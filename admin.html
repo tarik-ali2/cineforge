@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Panel - AI Prompts Master Pack</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="admin-body">
+    <section class="admin-login" id="adminLogin">
+      <form class="admin-login-card" id="adminLoginForm">
+        <span class="brand-mark">AI</span>
+        <p class="eyebrow">Admin Login</p>
+        <h1>Dashboard access</h1>
+        <label>
+          Admin ID
+          <input name="adminId" type="text" placeholder="Enter admin ID" autocomplete="username" required />
+        </label>
+        <label>
+          Password
+          <input name="password" type="password" placeholder="Enter password" autocomplete="current-password" required />
+        </label>
+        <button class="primary-btn full" type="submit">Login</button>
+        <p class="login-error" id="loginError" hidden>Wrong admin ID or password.</p>
+        <p class="tiny-note">Demo login: admin / admin123</p>
+      </form>
+    </section>
+
+    <header class="admin-header">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">AI</span>
+        <span>Prompt Pack Admin</span>
+      </a>
+      <div class="admin-actions">
+        <a class="secondary-btn" href="index.html">View Landing</a>
+        <button class="secondary-btn" type="button" id="logoutAdmin">Logout</button>
+        <button class="primary-btn" type="button" id="exportCsv">Export CSV</button>
+      </div>
+    </header>
+
+    <main class="admin-shell">
+      <section class="admin-hero">
+        <div>
+          <p class="eyebrow">Dashboard</p>
+          <h1>Sales, leads aur delivery status ek jagah.</h1>
+        </div>
+        <div class="admin-live">
+          <span></span>
+          Backend server active
+        </div>
+      </section>
+
+      <section class="metric-grid" aria-label="Dashboard metrics">
+        <article>
+          <span>Total Orders</span>
+          <strong id="totalOrders">0</strong>
+        </article>
+        <article>
+          <span>Total Revenue</span>
+          <strong id="totalRevenue">₹0</strong>
+        </article>
+        <article>
+          <span>Emails Captured</span>
+          <strong id="totalEmails">0</strong>
+        </article>
+        <article>
+          <span>PDF Deliveries</span>
+          <strong id="totalDeliveries">0</strong>
+        </article>
+      </section>
+
+      <section class="admin-panel">
+        <div class="panel-top">
+          <div>
+            <p class="eyebrow">Customer Records</p>
+            <h2>Recent payments</h2>
+          </div>
+          <div class="admin-tools">
+            <input id="searchOrders" type="search" placeholder="Search name, phone, email" />
+            <button class="secondary-btn" type="button" id="addDemo">Add Demo</button>
+            <button class="danger-btn" type="button" id="clearOrders">Clear</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Payment ID</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTable"></tbody>
+          </table>
+          <div class="empty-state" id="emptyState">
+            <strong>No orders yet</strong>
+            <span>Landing page se demo payment complete karte hi record yahan aa jayega.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-panel">
+        <div class="panel-top">
+          <div>
+            <p class="eyebrow">Product & Payment Settings</p>
+            <h2>Upload PDF, media aur gateway details</h2>
+          </div>
+          <button class="primary-btn" type="button" id="saveSettings">Save Settings</button>
+        </div>
+
+        <div class="settings-grid">
+          <label>
+            Product Name
+            <input id="settingProductName" type="text" placeholder="10 Lakh+ AI Prompt Bundle" />
+          </label>
+          <label>
+            Sale Price
+            <input id="settingPrice" type="number" min="1" placeholder="199" />
+          </label>
+          <label>
+            MRP / Cut Price
+            <input id="settingMrp" type="number" min="1" placeholder="4999" />
+          </label>
+          <label>
+            Razorpay Key ID
+            <input id="settingRazorpay" type="text" placeholder="rzp_live_xxxxx" />
+          </label>
+          <label>
+            Razorpay Key Secret
+            <input id="settingRazorpaySecret" type="password" placeholder="rzp_secret_xxxxx (server pe save hoga)" />
+          </label>
+          <label>
+            Gmail Email Address
+            <input id="settingEmailFrom" type="email" placeholder="yourstore@gmail.com" />
+          </label>
+          <label>
+            Gmail App Password
+            <input id="settingEmailPassword" type="password" placeholder="Google App Password (16-char)" />
+          </label>
+          <label>
+            Automation Webhook URL
+            <input id="settingWebhook" type="url" placeholder="Make / Zapier / Pabbly / n8n webhook" />
+          </label>
+          <label class="toggle-row">
+            <input id="settingDemoMode" type="checkbox" />
+            Demo payment mode
+          </label>
+        </div>
+
+        <div class="size-guide-box">
+          <strong>📐 Recommended Upload Sizes</strong>
+          <div class="size-guide-grid">
+            <span>🖼️ <b>Image (Hero / Gallery / Category)</b></span><span>1280×720px ya 1080×1080px · JPG/PNG · max 3MB</span>
+            <span>▶️ <b>Video (Sample / Gallery cards)</b></span><span>1080×1920px (vertical reel) ya 1280×720px · MP4 · max 50MB</span>
+            <span>📄 <b>PDF</b></span><span>Koi bhi size · max 25MB</span>
+          </div>
+        </div>
+
+        <div class="upload-grid">
+          <label>
+            <span class="upload-label-title">📄 PDF Upload</span>
+            <span class="upload-hint">Payment ke baad customer ko yahi PDF milegi (download + email dono mein) · max 25MB</span>
+            <input id="settingPdf" type="file" accept="application/pdf" />
+            <small id="pdfStatus">No custom PDF uploaded</small>
+          </label>
+          <label>
+            <span class="upload-label-title">🖼️ Hero Image — Landing Page ka Main Banner</span>
+            <span class="upload-hint">Sabse upar right side mein dikhta hai · 1280×720px JPG/PNG · max 3MB</span>
+            <input id="settingHeroImage" type="file" accept="image/*" />
+            <small id="heroImageStatus">Default image active</small>
+          </label>
+          <label>
+            <span class="upload-label-title">▶️ Sample 1 — "Viral Image Prompt" Card</span>
+            <span class="upload-hint">Card mein loop chalega, play click pe sound on · Video: 1280×720 MP4 max 50MB · Image: JPG max 3MB</span>
+            <input id="settingSampleImage" type="file" accept="image/*,video/*" />
+            <small id="sampleImageStatus">Default sample active</small>
+          </label>
+          <label>
+            <span class="upload-label-title">▶️ Sample 2 — "Reels &amp; Shorts" Card</span>
+            <span class="upload-hint">Card mein loop chalega, play click pe sound on · Video: 1080×1920 vertical MP4 max 50MB</span>
+            <input id="settingSampleReel" type="file" accept="image/*,video/*" />
+            <small id="sampleReelStatus">Default sample active</small>
+          </label>
+          <label>
+            <span class="upload-label-title">▶️ Sample 3 — "Product Ad" Card</span>
+            <span class="upload-hint">Card mein loop chalega, play click pe sound on · Video: 1280×720 MP4 max 50MB</span>
+            <input id="settingSampleProduct" type="file" accept="image/*,video/*" />
+            <small id="sampleProductStatus">Default sample active</small>
+          </label>
+          <label>
+            <span class="upload-label-title">🖼️ Gallery Card 1 — "Image Creation Prompts"</span>
+            <span class="upload-hint">Bundle Preview section · Video: MP4 max 50MB · Image: 1280×720 JPG max 3MB</span>
+            <input id="settingGallery1" type="file" accept="image/*,video/*" />
+            <small id="gallery1Status">CSS art (default)</small>
+          </label>
+          <label>
+            <span class="upload-label-title">🎬 Gallery Card 2 — "Video &amp; Reels Prompts"</span>
+            <span class="upload-hint">Bundle Preview section · Video: MP4 max 50MB · Image: 1280×720 JPG max 3MB</span>
+            <input id="settingGallery2" type="file" accept="image/*,video/*" />
+            <small id="gallery2Status">CSS art (default)</small>
+          </label>
+          <label>
+            <span class="upload-label-title">📢 Gallery Card 3 — "Business Ad Prompts"</span>
+            <span class="upload-hint">Bundle Preview section · Video: MP4 max 50MB · Image: 1280×720 JPG max 3MB</span>
+            <input id="settingGallery3" type="file" accept="image/*,video/*" />
+            <small id="gallery3Status">CSS art (default)</small>
+          </label>
+          <label>
+            <span class="upload-label-title">🎉 Gallery Card 4 — "Festival &amp; Event Prompts"</span>
+            <span class="upload-hint">Bundle Preview section · Video: MP4 max 50MB · Image: 1280×720 JPG max 3MB</span>
+            <input id="settingGallery4" type="file" accept="image/*,video/*" />
+            <small id="gallery4Status">CSS art (default)</small>
+          </label>
+
+          <label>
+            <span class="upload-label-title">💍 Category 1 — Indian Wedding Prompts</span>
+            <span class="upload-hint">Categories section — pehla card, sirf image dikhegi (non-clickable)</span>
+            <input id="settingCat1" type="file" accept="image/*" />
+            <small id="cat1Status">CSS art (default)</small>
+          </label>
+          <label>
+            <span class="upload-label-title">🎂 Category 2 — Birthday Celebration Prompts</span>
+            <span class="upload-hint">Categories section — doosra card, sirf image dikhegi (non-clickable)</span>
+            <input id="settingCat2" type="file" accept="image/*" />
+            <small id="cat2Status">CSS art (default)</small>
+          </label>
+          <label>
+            <span class="upload-label-title">📢 Category 3 — Commercial Brand Campaign</span>
+            <span class="upload-hint">Categories section — teesra card, sirf image dikhegi (non-clickable)</span>
+            <input id="settingCat3" type="file" accept="image/*" />
+            <small id="cat3Status">CSS art (default)</small>
+          </label>
+          <label>
+            <span class="upload-label-title">🛕 Category 4 — Divine Cinematic Prompts</span>
+            <span class="upload-hint">Categories section — chautha card, sirf image dikhegi (non-clickable)</span>
+            <input id="settingCat4" type="file" accept="image/*" />
+            <small id="cat4Status">CSS art (default)</small>
+          </label>
+          <label>
+            <span class="upload-label-title">👗 Category 5 — Fashion &amp; E-commerce Shoot</span>
+            <span class="upload-hint">Categories section — paanchwa card, sirf image dikhegi (non-clickable)</span>
+            <input id="settingCat5" type="file" accept="image/*" />
+            <small id="cat5Status">CSS art (default)</small>
+          </label>
+          <label>
+            <span class="upload-label-title">🏠 Category 6 — Interior &amp; Real Estate</span>
+            <span class="upload-hint">Categories section — chhatha card, sirf image dikhegi (non-clickable)</span>
+            <input id="settingCat6" type="file" accept="image/*" />
+            <small id="cat6Status">CSS art (default)</small>
+          </label>
+          <label>
+            <span class="upload-label-title">💎 Category 7 — Jewelry Photoshoot Prompts</span>
+            <span class="upload-hint">Categories section — saatwa card, sirf image dikhegi (non-clickable)</span>
+            <input id="settingCat7" type="file" accept="image/*" />
+            <small id="cat7Status">CSS art (default)</small>
+          </label>
+          <label>
+            <span class="upload-label-title">🔮 Category 8 — Miniature &amp; Viral Concepts</span>
+            <span class="upload-hint">Categories section — aathwa card, sirf image dikhegi (non-clickable)</span>
+            <input id="settingCat8" type="file" accept="image/*" />
+            <small id="cat8Status">CSS art (default)</small>
+          </label>
+        </div>
+
+        <p class="settings-note" id="settingsNote">
+          Files server par save hoti hain. Gmail App Password ke liye: Google Account → Security → 2-Step Verification ON karo → App Passwords → Generate karo.
+        </p>
+      </section>
+
+      <section class="admin-panel">
+        <div class="panel-top">
+          <div>
+            <p class="eyebrow">Landing Content Editor</p>
+            <h2>Landing page ka text khud edit karo</h2>
+          </div>
+          <button class="primary-btn" type="button" id="saveContent">Save Content</button>
+        </div>
+
+        <div class="content-editor-grid">
+          <label>Brand Name<input id="contentBrandName" type="text" /></label>
+          <label>Top Purchase Popup<input id="contentToastText" type="text" /></label>
+          <label>Hero Badge<input id="contentHeroBadge" type="text" /></label>
+          <label>Hero Mini Text<input id="contentHeroMini" type="text" /></label>
+          <label>Hero Line 1<input id="contentHeroLine1" type="text" /></label>
+          <label>Hero Line 2<input id="contentHeroLine2" type="text" /></label>
+          <label>Hero Line 3<input id="contentHeroLine3" type="text" /></label>
+          <label>Hero Subheadline<input id="contentHeroSubheadline" type="text" /></label>
+          <label class="wide-field">Hero Description<textarea id="contentHeroDescription" rows="4"></textarea></label>
+          <label>AI Tool Chips<input id="contentHeroChips" type="text" placeholder="Gemini, Midjourney, Sora" /></label>
+          <label>Offer Small Text<input id="contentOfferSmallText" type="text" /></label>
+          <label>Slots/Urgency Text<input id="contentSlotText" type="text" /></label>
+          <label>Main CTA Text<input id="contentMainCta" type="text" /></label>
+          <label>Buy Now CTA Text<input id="contentBuyNowCta" type="text" /></label>
+          <label>Instant Download CTA<input id="contentInstantCta" type="text" /></label>
+          <label>Sample Section Kicker<input id="contentSampleKicker" type="text" /></label>
+          <label>Sample Heading<input id="contentSampleHeading" type="text" /></label>
+          <label class="wide-field">Sample Intro<textarea id="contentSampleIntro" rows="3"></textarea></label>
+          <label>Sample 1 Title<input id="contentSample1Title" type="text" /></label>
+          <label>Sample 1 Text<input id="contentSample1Text" type="text" /></label>
+          <label class="wide-field">Sample 1 Popup Prompt<textarea id="contentSample1Prompt" rows="3"></textarea></label>
+          <label>Sample 2 Title<input id="contentSample2Title" type="text" /></label>
+          <label>Sample 2 Text<input id="contentSample2Text" type="text" /></label>
+          <label class="wide-field">Sample 2 Popup Prompt<textarea id="contentSample2Prompt" rows="3"></textarea></label>
+          <label>Sample 3 Title<input id="contentSample3Title" type="text" /></label>
+          <label>Sample 3 Text<input id="contentSample3Text" type="text" /></label>
+          <label class="wide-field">Sample 3 Popup Prompt<textarea id="contentSample3Prompt" rows="3"></textarea></label>
+          <label>Gallery Kicker<input id="contentGalleryKicker" type="text" /></label>
+          <label>Gallery Heading<input id="contentGalleryHeading" type="text" /></label>
+          <label>Category Kicker<input id="contentCategoryKicker" type="text" /></label>
+          <label>Category Heading<input id="contentCategoryHeading" type="text" /></label>
+          <label class="wide-field">Middle CTA Heading<textarea id="contentDarkCtaHeading" rows="3"></textarea></label>
+          <label>Benefits Heading<input id="contentBenefitHeading" type="text" /></label>
+          <label>Reviews Heading<input id="contentReviewHeading" type="text" /></label>
+          <label>Final Offer Heading<input id="contentFinalOfferHeading" type="text" /></label>
+          <label class="wide-field">Final Offer Text<textarea id="contentFinalOfferText" rows="3"></textarea></label>
+          <label>FAQ Heading<input id="contentFaqHeading" type="text" /></label>
+          <label>Footer Copyright<input id="contentFooterCopyright" type="text" /></label>
+        </div>
+        <p class="settings-note" id="contentNote">Content save karne ke baad landing page reload karo.</p>
+      </section>
+
+      <section class="admin-panel setup-panel">
+        <div>
+          <p class="eyebrow">Live Setup</p>
+          <h2>Production me kya connect hoga?</h2>
+        </div>
+        <div class="setup-grid">
+          <article>
+            <strong>Razorpay Orders API</strong>
+            <p>Backend se order create aur payment signature verify karein.</p>
+          </article>
+          <article>
+            <strong>Email Automation</strong>
+            <p>Make, Zapier, Pabbly, n8n ya custom API se PDF link send karein.</p>
+          </article>
+          <article>
+            <strong>Database</strong>
+            <p>LocalStorage ki jagah Google Sheet, Supabase, MySQL ya CRM connect karein.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script src="admin.js"></script>
+  </body>
+</html>

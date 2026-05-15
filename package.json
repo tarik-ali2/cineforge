@@ -1,0 +1,16 @@
+{
+  "name": "cineforge-sales",
+  "version": "1.0.0",
+  "description": "AI Prompts Sales Landing Page with Admin Panel",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "multer": "^2.1.1",
+    "nodemailer": "^8.0.7",
+    "razorpay": "^2.9.2"
+  }
+}
