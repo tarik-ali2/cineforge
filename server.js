@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { MongoClient } from 'mongodb';
+import { v2 as cloudinary } from 'cloudinary';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -183,16 +184,48 @@ app.use(express.static(path.join(__dirname), { index: false, dotfiles: 'ignore' 
 // Uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// ── Cloudinary setup ──────────────────────────────────────────────────────────
+
+const CLOUDINARY_OK = !!(
+  process.env.CLOUDINARY_CLOUD_NAME &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_API_SECRET
+);
+
+if (CLOUDINARY_OK) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key:    process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+  console.log('Cloudinary configured ✓');
+} else {
+  console.warn('Cloudinary not configured — uploads saved to local disk (ephemeral on Render)');
+}
+
 // ── File Upload ───────────────────────────────────────────────────────────────
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, 'uploads')),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${file.fieldname}-${Date.now()}${ext}`);
-  },
-});
-const upload = multer({ storage, limits: { fileSize: 200 * 1024 * 1024 } });
+// Always use memory storage; we save to disk or Cloudinary in the route handler
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
+
+async function saveFile(file) {
+  if (CLOUDINARY_OK) {
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: 'cineforge', resource_type: 'auto' },
+        (err, r) => (err ? reject(err) : resolve(r))
+      );
+      stream.end(file.buffer);
+    });
+    return result.secure_url;
+  }
+  // Local fallback (files lost on Render restart)
+  const ext = path.extname(file.originalname);
+  const filename = `${file.fieldname}-${Date.now()}${ext}`;
+  const filepath = path.join(__dirname, 'uploads', filename);
+  fs.writeFileSync(filepath, file.buffer);
+  return `/uploads/${filename}`;
+}
 
 // ── Settings ──────────────────────────────────────────────────────────────────
 
@@ -252,13 +285,14 @@ app.post('/api/upload', upload.fields([
     const result = {};
     for (const [field, files] of Object.entries(req.files || {})) {
       const file = files[0];
-      const urlPath = `/uploads/${file.filename}`;
+      file.fieldname = field;
+      const urlPath = await saveFile(file);
       settings[`${field}Path`] = urlPath;
       settings[`${field}Name`] = file.originalname;
       result[field] = { path: urlPath, name: file.originalname };
     }
     await setDoc('settings', settings);
-    res.json({ ok: true, files: result });
+    res.json({ ok: true, files: result, cloudinary: CLOUDINARY_OK });
   } catch (err) {
     console.error('Upload error:', err);
     res.status(500).json({ ok: false, error: err.message });

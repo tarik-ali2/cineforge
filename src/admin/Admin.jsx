@@ -371,65 +371,113 @@ function Content({ content, onSave }) {
   )
 }
 
+// ── MediaField — standalone component so it can use hooks ────────────────────
+function MediaField({ label, field, accept, hint, settings, uploading, onUpload, onSaveUrl }) {
+  const [urlInput, setUrlInput] = useState('')
+  const currentPath = settings[`${field}Path`] || ''
+  const isImage = currentPath && !currentPath.endsWith('.pdf') && !currentPath.endsWith('.mp4') && !currentPath.endsWith('.mov') && !currentPath.endsWith('.webm')
+
+  const handleSave = async () => {
+    const trimmed = urlInput.trim()
+    if (!trimmed) return
+    await onSaveUrl(field, trimmed)
+    setUrlInput('')
+  }
+
+  return (
+    <div style={{ padding: '14px 0', borderBottom: '1px solid #f1f5f9' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+        {isImage && (
+          <img src={currentPath} alt="" onError={e => { e.target.style.display = 'none' }}
+            style={{ width: 64, height: 48, objectFit: 'cover', borderRadius: 6, flexShrink: 0, border: '1px solid #e2e8f0' }} />
+        )}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>{label}</div>
+          <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{hint}</div>
+          {currentPath && <div style={{ fontSize: 11, color: '#22c55e', marginTop: 3, wordBreak: 'break-all' }}>✓ Saved</div>}
+        </div>
+        <label style={{ position: 'relative', padding: '8px 16px', background: '#0f172a', color: '#fff', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
+          {uploading[field] ? 'Uploading...' : '⬆ Upload'}
+          <input type="file" accept={accept} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }}
+            onChange={e => e.target.files[0] && onUpload(field, e.target.files[0])} />
+        </label>
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        <input type="url" value={urlInput} onChange={e => setUrlInput(e.target.value)}
+          placeholder="Ya seedha image URL paste karo (imgbb.com ya koi bhi)"
+          style={{ flex: 1, padding: '7px 10px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 12, outline: 'none' }}
+          onKeyDown={e => e.key === 'Enter' && handleSave()}
+        />
+        <button onClick={handleSave}
+          style={{ padding: '7px 14px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+          URL Save
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── Media ─────────────────────────────────────────────────────────────────────
 function Media({ settings, onRefresh }) {
   const [uploading, setUploading] = useState({})
   const [msg, setMsg] = useState('')
 
-  const upload = async (field, file) => {
+  const handleUpload = async (field, file) => {
     setUploading(p => ({ ...p, [field]: true }))
     const fd = new FormData()
     fd.append(field, file)
     const res = await api.upload(fd)
     setUploading(p => ({ ...p, [field]: false }))
-    if (res.ok) { setMsg(`✓ ${field} uploaded!`); setTimeout(() => setMsg(''), 3000); onRefresh() }
-    else setMsg(`✗ Upload failed: ${res.error}`)
+    if (res.ok) {
+      setMsg(res.cloudinary ? '✓ Uploaded to Cloudinary!' : '⚠️ Uploaded locally (set Cloudinary env vars for permanent storage)')
+      setTimeout(() => setMsg(''), 5000)
+      onRefresh()
+    } else {
+      setMsg(`✗ Upload failed: ${res.error}`)
+    }
   }
 
-  const MF = ({ label, field, accept, hint }) => (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid #f1f5f9' }}>
-      <div>
-        <div style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>{label}</div>
-        <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{hint}</div>
-        {settings[`${field}Name`] && (
-          <div style={{ fontSize: 12, color: '#22c55e', marginTop: 4 }}>✓ {settings[`${field}Name`]}</div>
-        )}
-      </div>
-      <label style={{ position: 'relative', padding: '8px 18px', background: '#0f172a', color: '#fff', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}>
-        {uploading[field] ? 'Uploading...' : '⬆ Upload'}
-        <input type="file" accept={accept} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }}
-          onChange={e => e.target.files[0] && upload(field, e.target.files[0])} />
-      </label>
-    </div>
-  )
+  const handleSaveUrl = async (field, url) => {
+    const res = await api.post('/api/settings', { [`${field}Path`]: url, [`${field}Name`]: url.split('/').pop().split('?')[0] || 'external' })
+    if (res.ok) { setMsg('✓ URL saved!'); setTimeout(() => setMsg(''), 3000); onRefresh() }
+    else setMsg('✗ Save failed')
+  }
+
+  const mfProps = { settings, uploading, onUpload: handleUpload, onSaveUrl: handleSaveUrl }
 
   return (
-    <Page title="Media Manager" action={msg && <span style={{ color: msg.startsWith('✓') ? '#22c55e' : '#dc2626', fontWeight: 600 }}>{msg}</span>}>
+    <Page title="Media Manager" action={msg && <span style={{ color: msg.startsWith('✓') ? '#22c55e' : msg.startsWith('⚠') ? '#f59e0b' : '#dc2626', fontWeight: 600 }}>{msg}</span>}>
+      <div style={{ background: '#fffbeb', border: '1px solid #fbbf24', borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 13, color: '#92400e', lineHeight: 1.6 }}>
+        <strong>⚠️ Important:</strong> Render ke server par uploaded files restart pe delete ho jate hain.<br />
+        <strong>Best option:</strong> Kisi bhi image ko <a href="https://imgbb.com" target="_blank" rel="noreferrer" style={{ color: '#b45309' }}>imgbb.com</a> par upload karo (free, no signup) → URL copy karo → "URL Save" karo.<br />
+        <strong>Ya</strong> Render env vars mein <code>CLOUDINARY_CLOUD_NAME</code>, <code>CLOUDINARY_API_KEY</code>, <code>CLOUDINARY_API_SECRET</code> set karo (free at cloudinary.com).
+      </div>
+
       <div style={{ display: 'grid', gap: 20, maxWidth: 760 }}>
 
         <Card title="📄 PDF Bundle">
-          <MF label="PDF File" field="pdf" accept=".pdf" hint="Customer download karega · max 25MB" />
+          <MediaField {...mfProps} label="PDF File" field="pdf" accept=".pdf" hint="Customer download karega" />
         </Card>
 
         <Card title="🖼️ Hero Image">
-          <MF label="Main Banner Image" field="heroImage" accept="image/*" hint="1280×720px JPG/PNG · max 3MB" />
+          <MediaField {...mfProps} label="Main Banner Image" field="heroImage" accept="image/*" hint="1280×720px JPG/PNG" />
         </Card>
 
         <Card title="🎬 Sample Cards (3)">
-          <MF label="Sample 1 — Viral Image Prompt" field="sampleImage"   accept="image/*,video/*" hint="Image ya Video · max 50MB" />
-          <MF label="Sample 2 — Reels & Shorts"     field="sampleReel"    accept="video/*"         hint="MP4 video · max 50MB" />
-          <MF label="Sample 3 — Product Ad"          field="sampleProduct" accept="image/*,video/*" hint="Image ya Video · max 50MB" />
+          <MediaField {...mfProps} label="Sample 1 — Viral Image Prompt" field="sampleImage"   accept="image/*,video/*" hint="Image ya Video" />
+          <MediaField {...mfProps} label="Sample 2 — Reels & Shorts"     field="sampleReel"    accept="video/*"         hint="MP4 video" />
+          <MediaField {...mfProps} label="Sample 3 — Product Ad"          field="sampleProduct" accept="image/*,video/*" hint="Image ya Video" />
         </Card>
 
         <Card title="🖼️ Gallery Cards (4)">
           {[1,2,3,4].map(n => (
-            <MF key={n} label={`Gallery ${n}`} field={`gallery${n}`} accept="image/*,video/*" hint="1280×720 ya 1080×1920 · JPG/MP4 · max 50MB" />
+            <MediaField key={n} {...mfProps} label={`Gallery ${n}`} field={`gallery${n}`} accept="image/*,video/*" hint="1280×720 JPG/PNG" />
           ))}
         </Card>
 
         <Card title="📂 Category Images (8)">
           {[1,2,3,4,5,6,7,8].map(n => (
-            <MF key={n} label={`Category ${n}`} field={`cat${n}`} accept="image/*" hint="1280×720 JPG · max 3MB" />
+            <MediaField key={n} {...mfProps} label={`Category ${n}`} field={`cat${n}`} accept="image/*" hint="1280×720 JPG/PNG" />
           ))}
         </Card>
 
