@@ -106,9 +106,9 @@ export default function App() {
 
       <main id="top">
         <Hero onBuy={openBuy} content={content} settings={settings} />
-        <SampleSection onBuy={openBuy} onOpenSample={setSampleOpen} content={content} />
-        <GallerySection content={content} />
-        <CategorySection content={content} />
+        <SampleSection onBuy={openBuy} onOpenSample={setSampleOpen} content={content} settings={settings} />
+        <GallerySection content={content} settings={settings} />
+        <CategorySection content={content} settings={settings} />
         <DarkCTA onBuy={openBuy} content={content} settings={settings} />
         <Benefits content={content} />
         <Reviews content={content} />
