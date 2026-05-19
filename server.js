@@ -1,45 +1,103 @@
-const express = require('express');
-const multer = require('multer');
-const nodemailer = require('nodemailer');
-const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
+import express from 'express';
+import multer from 'multer';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { MongoClient } from 'mongodb';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const MONGO_URI = process.env.MONGO_URI;
 
-app.use(express.json());
+// ── Database ─────────────────────────────────────────────────────────────────
 
-// No-cache for all API responses
-app.use('/api', (req, res, next) => {
-  res.set('Cache-Control', 'no-store');
-  next();
-});
+let db = null;
 
-app.use(express.static(path.join(__dirname)));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+async function connectDB() {
+  if (!MONGO_URI) return;
+  try {
+    const client = new MongoClient(MONGO_URI);
+    await client.connect();
+    db = client.db('cineforge');
+    console.log('MongoDB connected');
+  } catch (err) {
+    console.error('MongoDB connection failed:', err.message);
+  }
+}
 
+// JSON file fallback (for local development)
+const DATA = path.join(__dirname, 'data');
 ['uploads', 'data'].forEach((dir) => {
   const p = path.join(__dirname, dir);
   if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
 });
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, 'uploads')),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${file.fieldname}-${Date.now()}${ext}`);
-  },
-});
-const upload = multer({ storage, limits: { fileSize: 200 * 1024 * 1024 } });
-
-const DATA = path.join(__dirname, 'data');
-const readData = (name, def) => {
+const readJson = (name, def) => {
   try { return JSON.parse(fs.readFileSync(path.join(DATA, `${name}.json`), 'utf8')); }
   catch { return def; }
 };
-const writeData = (name, data) =>
+const writeJson = (name, data) =>
   fs.writeFileSync(path.join(DATA, `${name}.json`), JSON.stringify(data, null, 2));
+
+// ── Generic key-value store (settings, content) ───────────────────────────────
+
+async function getDoc(name, defaults) {
+  if (db) {
+    const doc = await db.collection(name).findOne({ _key: 'main' });
+    if (doc) {
+      const { _id, _key, ...data } = doc;
+      return { ...defaults, ...data };
+    }
+    return { ...defaults };
+  }
+  return { ...defaults, ...readJson(name, {}) };
+}
+
+async function setDoc(name, data) {
+  if (db) {
+    await db.collection(name).updateOne(
+      { _key: 'main' },
+      { $set: { _key: 'main', ...data } },
+      { upsert: true }
+    );
+  } else {
+    writeJson(name, data);
+  }
+}
+
+// ── Orders ────────────────────────────────────────────────────────────────────
+
+async function getOrders() {
+  if (db) {
+    return db.collection('orders').find({}).sort({ createdAt: -1 }).toArray();
+  }
+  return readJson('orders', []);
+}
+
+async function addOrder(order) {
+  if (db) {
+    await db.collection('orders').insertOne(order);
+  } else {
+    const orders = readJson('orders', []);
+    orders.unshift(order);
+    writeJson('orders', orders);
+  }
+}
+
+async function clearOrders() {
+  if (db) {
+    await db.collection('orders').deleteMany({});
+  } else {
+    writeJson('orders', []);
+  }
+}
+
+// ── Defaults ──────────────────────────────────────────────────────────────────
 
 const DEFAULT_SETTINGS = {
   productName: '10 Lakh+ AI Prompt Bundle',
@@ -53,22 +111,14 @@ const DEFAULT_SETTINGS = {
   emailPassword: '',
   pdfPath: '',
   pdfName: '',
-  heroImagePath: '',
-  heroImageName: '',
-  sampleImagePath: '',
-  sampleImageName: '',
-  sampleReelPath: '',
-  sampleReelName: '',
-  sampleProductPath: '',
-  sampleProductName: '',
-  gallery1Path: '',
-  gallery1Name: '',
-  gallery2Path: '',
-  gallery2Name: '',
-  gallery3Path: '',
-  gallery3Name: '',
-  gallery4Path: '',
-  gallery4Name: '',
+  heroImagePath: '',   heroImageName: '',
+  sampleImagePath: '', sampleImageName: '',
+  sampleReelPath: '',  sampleReelName: '',
+  sampleProductPath: '', sampleProductName: '',
+  gallery1Path: '', gallery1Name: '',
+  gallery2Path: '', gallery2Name: '',
+  gallery3Path: '', gallery3Name: '',
+  gallery4Path: '', gallery4Name: '',
   cat1Path: '', cat1Name: '',
   cat2Path: '', cat2Name: '',
   cat3Path: '', cat3Name: '',
@@ -120,36 +170,69 @@ const DEFAULT_CONTENT = {
   footerCopyright: 'Copyright © 2026 Market Prompt Hub',
 };
 
-// ── Settings ────────────────────────────────────────────────────────────────
+// ── Middleware ────────────────────────────────────────────────────────────────
 
-app.get('/api/settings', (req, res) => {
-  const s = { ...DEFAULT_SETTINGS, ...readData('settings', {}) };
-  const { razorpayKeySecret, emailPassword, ...safe } = s;
-  res.json({ ...safe, hasRazorpaySecret: !!razorpayKeySecret, hasEmailPassword: !!emailPassword });
+app.use(express.json());
+app.use('/api', (req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
+
+// Serve built React app
+app.use(express.static(path.join(__dirname, 'dist')));
+// Admin panel (not part of React build)
+app.get('/admin.html', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+app.get('/admin.js',   (req, res) => res.sendFile(path.join(__dirname, 'admin.js')));
+// Uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// ── File Upload ───────────────────────────────────────────────────────────────
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, path.join(__dirname, 'uploads')),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${file.fieldname}-${Date.now()}${ext}`);
+  },
+});
+const upload = multer({ storage, limits: { fileSize: 200 * 1024 * 1024 } });
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+
+app.get('/api/settings', async (req, res) => {
+  try {
+    const s = await getDoc('settings', DEFAULT_SETTINGS);
+    const { razorpayKeySecret, emailPassword, ...safe } = s;
+    res.json({ ...safe, hasRazorpaySecret: !!razorpayKeySecret, hasEmailPassword: !!emailPassword });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.get('/api/settings/full', (req, res) => {
-  res.json({ ...DEFAULT_SETTINGS, ...readData('settings', {}) });
+app.get('/api/settings/full', async (req, res) => {
+  try { res.json(await getDoc('settings', DEFAULT_SETTINGS)); }
+  catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/settings', (req, res) => {
-  const current = { ...DEFAULT_SETTINGS, ...readData('settings', {}) };
-  writeData('settings', { ...current, ...req.body });
-  res.json({ ok: true });
+app.post('/api/settings', async (req, res) => {
+  try {
+    const current = await getDoc('settings', DEFAULT_SETTINGS);
+    await setDoc('settings', { ...current, ...req.body });
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── Content ─────────────────────────────────────────────────────────────────
+// ── Content ───────────────────────────────────────────────────────────────────
 
-app.get('/api/content', (req, res) => {
-  res.json({ ...DEFAULT_CONTENT, ...readData('content', {}) });
+app.get('/api/content', async (req, res) => {
+  try { res.json(await getDoc('content', DEFAULT_CONTENT)); }
+  catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/content', (req, res) => {
-  writeData('content', { ...DEFAULT_CONTENT, ...readData('content', {}), ...req.body });
-  res.json({ ok: true });
+app.post('/api/content', async (req, res) => {
+  try {
+    const current = await getDoc('content', DEFAULT_CONTENT);
+    await setDoc('content', { ...current, ...req.body });
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── File Upload ──────────────────────────────────────────────────────────────
+// ── Upload ────────────────────────────────────────────────────────────────────
 
 app.post('/api/upload', upload.fields([
   { name: 'pdf', maxCount: 1 },
@@ -157,23 +240,16 @@ app.post('/api/upload', upload.fields([
   { name: 'sampleImage', maxCount: 1 },
   { name: 'sampleReel', maxCount: 1 },
   { name: 'sampleProduct', maxCount: 1 },
-  { name: 'gallery1', maxCount: 1 },
-  { name: 'gallery2', maxCount: 1 },
-  { name: 'gallery3', maxCount: 1 },
-  { name: 'gallery4', maxCount: 1 },
-  { name: 'cat1', maxCount: 1 },
-  { name: 'cat2', maxCount: 1 },
-  { name: 'cat3', maxCount: 1 },
-  { name: 'cat4', maxCount: 1 },
-  { name: 'cat5', maxCount: 1 },
-  { name: 'cat6', maxCount: 1 },
-  { name: 'cat7', maxCount: 1 },
-  { name: 'cat8', maxCount: 1 },
-]), (req, res) => {
+  { name: 'gallery1', maxCount: 1 }, { name: 'gallery2', maxCount: 1 },
+  { name: 'gallery3', maxCount: 1 }, { name: 'gallery4', maxCount: 1 },
+  { name: 'cat1', maxCount: 1 }, { name: 'cat2', maxCount: 1 },
+  { name: 'cat3', maxCount: 1 }, { name: 'cat4', maxCount: 1 },
+  { name: 'cat5', maxCount: 1 }, { name: 'cat6', maxCount: 1 },
+  { name: 'cat7', maxCount: 1 }, { name: 'cat8', maxCount: 1 },
+]), async (req, res) => {
   try {
-    const settings = { ...DEFAULT_SETTINGS, ...readData('settings', {}) };
+    const settings = await getDoc('settings', DEFAULT_SETTINGS);
     const result = {};
-
     for (const [field, files] of Object.entries(req.files || {})) {
       const file = files[0];
       const urlPath = `/uploads/${file.filename}`;
@@ -181,48 +257,45 @@ app.post('/api/upload', upload.fields([
       settings[`${field}Name`] = file.originalname;
       result[field] = { path: urlPath, name: file.originalname };
     }
-
-    writeData('settings', settings);
+    await setDoc('settings', settings);
     res.json({ ok: true, files: result });
   } catch (err) {
     console.error('Upload error:', err);
     res.status(500).json({ ok: false, error: err.message });
   }
 }, (err, req, res, next) => {
-  console.error('Multer error:', err);
   res.status(400).json({ ok: false, error: err.message });
 });
 
-// ── Orders ──────────────────────────────────────────────────────────────────
+// ── Orders ────────────────────────────────────────────────────────────────────
 
-app.get('/api/orders', (req, res) => {
-  res.json(readData('orders', []));
+app.get('/api/orders', async (req, res) => {
+  try { res.json(await getOrders()); }
+  catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/orders', (req, res) => {
-  const orders = readData('orders', []);
-  const order = { id: crypto.randomUUID(), ...req.body, createdAt: new Date().toISOString() };
-  orders.unshift(order);
-  writeData('orders', orders);
-  res.json({ ok: true, order });
+app.post('/api/orders', async (req, res) => {
+  try {
+    const order = { id: crypto.randomUUID(), ...req.body, createdAt: new Date().toISOString() };
+    await addOrder(order);
+    res.json({ ok: true, order });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.delete('/api/orders', (req, res) => {
-  writeData('orders', []);
-  res.json({ ok: true });
+app.delete('/api/orders', async (req, res) => {
+  try { await clearOrders(); res.json({ ok: true }); }
+  catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── Razorpay ─────────────────────────────────────────────────────────────────
+// ── Razorpay ──────────────────────────────────────────────────────────────────
 
 app.post('/api/create-order', async (req, res) => {
-  const s = { ...DEFAULT_SETTINGS, ...readData('settings', {}) };
-
+  const s = await getDoc('settings', DEFAULT_SETTINGS);
   if (s.demoMode) return res.json({ demoMode: true });
   if (!s.razorpayKeyId || !s.razorpayKeySecret)
     return res.status(400).json({ error: 'Razorpay keys admin panel mein configure karein.' });
-
   try {
-    const Razorpay = require('razorpay');
+    const { default: Razorpay } = await import('razorpay');
     const rzp = new Razorpay({ key_id: s.razorpayKeyId, key_secret: s.razorpayKeySecret });
     const order = await rzp.orders.create({
       amount: s.price * 100,
@@ -230,13 +303,11 @@ app.post('/api/create-order', async (req, res) => {
       receipt: `rcpt_${Date.now()}`,
     });
     res.json({ orderId: order.id, amount: order.amount, currency: order.currency, keyId: s.razorpayKeyId });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.post('/api/verify-payment', async (req, res) => {
-  const s = { ...DEFAULT_SETTINGS, ...readData('settings', {}) };
+  const s = await getDoc('settings', DEFAULT_SETTINGS);
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature, lead } = req.body;
 
   if (!s.demoMode && s.razorpayKeySecret) {
@@ -254,10 +325,9 @@ app.post('/api/verify-payment', async (req, res) => {
     : `${req.protocol}://${req.get('host')}/ai-prompts-pack.pdf`;
   const pdfFilePath = s.pdfPath
     ? path.join(__dirname, s.pdfPath.replace(/^\//, ''))
-    : path.join(__dirname, 'ai-prompts-pack.pdf');
+    : path.join(__dirname, 'public', 'ai-prompts-pack.pdf');
   const pdfFileName = s.pdfName || 'prompt-bundle.pdf';
 
-  const orders = readData('orders', []);
   const order = {
     id: crypto.randomUUID(),
     ...lead,
@@ -267,13 +337,11 @@ app.post('/api/verify-payment', async (req, res) => {
     status: 'Paid',
     createdAt: new Date().toISOString(),
   };
-  orders.unshift(order);
-  writeData('orders', orders);
+  await addOrder(order);
 
-  if (s.emailFrom && s.emailPassword && lead && lead.email) {
-    sendEmail(s, lead, paymentId, pdfUrl, pdfFilePath, pdfFileName).catch((err) =>
-      console.warn('Email failed:', err.message),
-    );
+  if (s.emailFrom && s.emailPassword && lead?.email) {
+    sendEmail(s, lead, paymentId, pdfUrl, pdfFilePath, pdfFileName)
+      .catch((err) => console.warn('Email failed:', err.message));
   }
 
   if (s.automationWebhookUrl) {
@@ -288,16 +356,12 @@ app.post('/api/verify-payment', async (req, res) => {
 });
 
 async function sendEmail(s, lead, paymentId, pdfUrl, pdfFilePath, pdfFileName) {
-  const transporter = nodemailer.createTransporter({
+  const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: { user: s.emailFrom, pass: s.emailPassword },
   });
-
   const attachments = [];
-  if (fs.existsSync(pdfFilePath)) {
-    attachments.push({ filename: pdfFileName, path: pdfFilePath });
-  }
-
+  if (fs.existsSync(pdfFilePath)) attachments.push({ filename: pdfFileName, path: pdfFilePath });
   await transporter.sendMail({
     from: `"${s.productName}" <${s.emailFrom}>`,
     to: lead.email,
@@ -305,24 +369,25 @@ async function sendEmail(s, lead, paymentId, pdfUrl, pdfFilePath, pdfFileName) {
     html: `
       <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;">
         <h2 style="color:#1a1a2e;">Thank you, ${lead.name}!</h2>
-        <p>Aapka payment successful raha. Neeche button se apna AI Prompt Bundle download karein:</p>
+        <p>Aapka payment successful raha. Neeche button se download karein:</p>
         <p style="margin:24px 0;">
-          <a href="${pdfUrl}" style="background:#6c63ff;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;">
+          <a href="${pdfUrl}" style="background:#6c63ff;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold;">
             Download PDF Bundle
           </a>
         </p>
-        ${attachments.length ? '<p>PDF is also attached to this email.</p>' : ''}
         <p style="color:#666;font-size:13px;">Payment ID: <code>${paymentId}</code></p>
-        <hr style="border:none;border-top:1px solid #eee;margin:24px 0;" />
-        <p style="color:#999;font-size:12px;">Koi bhi problem ho toh is email par reply karein.</p>
       </div>
     `,
     attachments,
   });
 }
 
-app.listen(PORT, () => {
-  console.log(`\nServer running at http://localhost:${PORT}`);
-  console.log(`  Landing page : http://localhost:${PORT}/`);
-  console.log(`  Admin panel  : http://localhost:${PORT}/admin.html\n`);
+// ── Start ─────────────────────────────────────────────────────────────────────
+
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`\nServer running at http://localhost:${PORT}`);
+    console.log(`  Landing page : http://localhost:${PORT}/`);
+    console.log(`  Admin panel  : http://localhost:${PORT}/admin.html\n`);
+  });
 });
