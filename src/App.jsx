@@ -104,7 +104,7 @@ export default function App() {
       <Toast msg={toastMsg} visible={toastVisible} />
       <Header onBuy={openBuy} content={content} />
 
-      <main id="top" className="pb-24 sm:pb-28">
+      <main id="top" className="pb-28 sm:pb-32">
         <Hero onBuy={openBuy} content={content} settings={settings} />
         <SampleSection onBuy={openBuy} onOpenSample={setSampleOpen} content={content} settings={settings} />
         <GallerySection content={content} settings={settings} />
