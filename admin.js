@@ -18,6 +18,7 @@ const saveSettings = document.querySelector('#saveSettings');
 const settingProductName = document.querySelector('#settingProductName');
 const settingPrice = document.querySelector('#settingPrice');
 const settingMrp = document.querySelector('#settingMrp');
+const settingPaymentLink = document.querySelector('#settingPaymentLink');
 const settingRazorpay = document.querySelector('#settingRazorpay');
 const settingRazorpaySecret = document.querySelector('#settingRazorpaySecret');
 const settingEmailFrom = document.querySelector('#settingEmailFrom');
@@ -230,6 +231,7 @@ async function saveAdminSettings() {
       productName: settingProductName.value.trim() || currentSettings.productName,
       price: Number(settingPrice.value) || currentSettings.price,
       mrp: Number(settingMrp.value) || currentSettings.mrp,
+      paymentLink: settingPaymentLink ? settingPaymentLink.value.trim() : '',
       razorpayKeyId: settingRazorpay.value.trim(),
       automationWebhookUrl: settingWebhook.value.trim(),
       demoMode: settingDemoMode.checked,
@@ -294,6 +296,7 @@ function renderSettings(s) {
   settingProductName.value = s.productName || '';
   settingPrice.value = s.price || '';
   settingMrp.value = s.mrp || '';
+  if (settingPaymentLink) settingPaymentLink.value = s.paymentLink || '';
   settingRazorpay.value = s.razorpayKeyId || '';
   settingWebhook.value = s.automationWebhookUrl || '';
   settingDemoMode.checked = !!s.demoMode;

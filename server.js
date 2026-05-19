@@ -103,6 +103,7 @@ const DEFAULT_SETTINGS = {
   productName: '10 Lakh+ AI Prompt Bundle',
   price: 199,
   mrp: 4999,
+  paymentLink: '',
   razorpayKeyId: '',
   razorpayKeySecret: '',
   automationWebhookUrl: '',

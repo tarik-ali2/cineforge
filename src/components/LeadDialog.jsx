@@ -14,17 +14,27 @@ export default function LeadDialog({ onClose, onPurchase }) {
     setLoading(true)
 
     try {
-      const orderRes = await fetch('/api/create-order', { method: 'POST' })
-      const orderData = await orderRes.json()
+      // Save lead to backend
+      await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          status: 'Pending',
+          paymentId: `lead_${Date.now()}`,
+          product: '10 Lakh+ AI Prompt Bundle',
+          amount: 199,
+        }),
+      })
 
-      if (orderData.error) {
-        setError(orderData.error)
-        setLoading(false)
-        return
-      }
+      // Get payment link from settings
+      const settings = await fetch('/api/settings').then(r => r.json())
 
-      if (orderData.demoMode) {
-        // Demo mode: directly verify without Razorpay
+      if (settings.paymentLink) {
+        // Redirect to payment link
+        window.location.href = settings.paymentLink
+      } else if (settings.demoMode) {
+        // Demo mode fallback
         const verifyRes = await fetch('/api/verify-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -34,7 +44,11 @@ export default function LeadDialog({ onClose, onPurchase }) {
         setLoading(false)
         onPurchase(form.name, verifyData.pdfUrl)
       } else {
-        // Live mode: open Razorpay checkout
+        // Live Razorpay fallback
+        const orderRes = await fetch('/api/create-order', { method: 'POST' })
+        const orderData = await orderRes.json()
+        if (orderData.error) { setError(orderData.error); setLoading(false); return }
+
         const options = {
           key: orderData.keyId,
           amount: orderData.amount,
@@ -44,39 +58,28 @@ export default function LeadDialog({ onClose, onPurchase }) {
           description: '10 Lakh+ AI Prompt Bundle',
           prefill: { name: form.name, email: form.email, contact: form.phone },
           theme: { color: '#e6382f' },
-          modal: {
-            ondismiss: () => setLoading(false),
-          },
+          modal: { ondismiss: () => setLoading(false) },
           handler: async (response) => {
-            try {
-              const verifyRes = await fetch('/api/verify-payment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                  lead: form,
-                }),
-              })
-              const verifyData = await verifyRes.json()
-              setLoading(false)
-              if (verifyData.ok) {
-                onPurchase(form.name, verifyData.pdfUrl)
-              } else {
-                setError('Payment verification failed. Support se contact karein.')
-              }
-            } catch {
-              setLoading(false)
-              setError('Verification mein error hua. Support se contact karein.')
-            }
+            const verifyRes = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                lead: form,
+              }),
+            })
+            const verifyData = await verifyRes.json()
+            setLoading(false)
+            if (verifyData.ok) onPurchase(form.name, verifyData.pdfUrl)
+            else setError('Payment verification failed.')
           },
         }
-        const rzp = new window.Razorpay(options)
-        rzp.open()
+        new window.Razorpay(options).open()
       }
     } catch {
-      setError('Network error. Internet connection check karein.')
+      setError('Network error. Internet check karein.')
       setLoading(false)
     }
   }
@@ -125,7 +128,7 @@ export default function LeadDialog({ onClose, onPurchase }) {
             disabled={loading}
             className="w-full min-h-[52px] rounded-lg bg-[#e6382f] text-white font-black text-base cursor-pointer border-0 hover:bg-[#b91f18] disabled:opacity-60 transition-colors"
           >
-            {loading ? 'Processing...' : 'Proceed To Payment'}
+            {loading ? 'Processing...' : 'Proceed To Payment — ₹199'}
           </button>
         </form>
       </div>
