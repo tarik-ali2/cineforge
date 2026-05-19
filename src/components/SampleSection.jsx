@@ -1,9 +1,13 @@
 import { useState } from 'react'
 
+const isVideo = src => /\.(mp4|mov|webm|avi)$/i.test(src || '')
+
 function SampleCard({ card, onOpen }) {
   const [playing, setPlaying] = useState(false)
+  const hasMedia = !!card.imgPath
+  const video    = hasMedia && isVideo(card.imgPath)
 
-  const bgStyle = card.imgPath
+  const bgStyle = hasMedia && !video
     ? { backgroundImage: `url(${card.imgPath})`, backgroundSize: 'cover', backgroundPosition: 'center' }
     : {}
 
@@ -13,38 +17,34 @@ function SampleCard({ card, onOpen }) {
       onClick={() => !playing && onOpen(card)}
     >
       <div
-        className={`media-screen min-h-[230px] mb-4 ${card.imgPath ? '' : card.css} ${playing ? 'is-playing' : ''}`}
+        className={`media-screen min-h-[200px] sm:min-h-[230px] mb-4 ${!hasMedia || video ? card.css : ''} ${playing ? 'is-playing' : ''}`}
         style={bgStyle}
       >
+        {video && (
+          <video
+            src={card.imgPath}
+            autoPlay muted loop playsInline
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }}
+          />
+        )}
+
         <button
-          className="play-overlay absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[72px] h-[72px] rounded-full bg-[#ffd02a] shadow-[0_0_0_12px_rgba(255,208,42,0.18)] grid place-items-center text-black text-2xl font-black z-10 border-0 cursor-pointer hover:scale-110 transition-transform"
-          onClick={(e) => { e.stopPropagation(); setPlaying(true) }}
+          className="play-overlay absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[64px] h-[64px] sm:w-[72px] sm:h-[72px] rounded-full bg-[#ffd02a] shadow-[0_0_0_12px_rgba(255,208,42,0.18)] grid place-items-center text-black text-2xl font-black z-10 border-0 cursor-pointer hover:scale-110 transition-transform"
+          onClick={e => { e.stopPropagation(); setPlaying(true) }}
           aria-label="Play sample"
-        >
-          ▶
-        </button>
+        >▶</button>
 
         {playing && (
           <>
             <button
-              className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full border-0 bg-black/60 text-white text-lg cursor-pointer backdrop-blur-sm flex items-center justify-center"
-              onClick={(e) => { e.stopPropagation(); setPlaying(false) }}
-              aria-label="Stop"
-            >
-              ✕
-            </button>
+              className="absolute top-3 right-3 z-20 w-9 h-9 rounded-full border-0 bg-black/60 text-white text-lg cursor-pointer backdrop-blur-sm flex items-center justify-center"
+              onClick={e => { e.stopPropagation(); setPlaying(false) }}
+            >✕</button>
             <div className="absolute inset-0 z-[3] flex flex-col items-center justify-center gap-2">
               <div className="flex gap-1 items-end h-8">
                 {[1,2,3,4,5].map(i => (
-                  <span
-                    key={i}
-                    className="w-1.5 bg-[#ffd02a] rounded-full"
-                    style={{
-                      height: `${10 + i * 5}px`,
-                      animation: `chip-float ${0.5 + i * 0.1}s ease-in-out infinite`,
-                      animationDelay: `${i * 0.08}s`,
-                    }}
-                  />
+                  <span key={i} className="w-1.5 bg-[#ffd02a] rounded-full"
+                    style={{ height: `${10 + i * 5}px`, animation: `chip-float ${0.5 + i * 0.1}s ease-in-out infinite`, animationDelay: `${i * 0.08}s` }} />
                 ))}
               </div>
               <span className="text-[#ffd02a] font-black text-sm">Playing Sample...</span>
@@ -53,7 +53,7 @@ function SampleCard({ card, onOpen }) {
         )}
       </div>
 
-      <h3 className="text-white font-black text-xl mb-2">{card.title}</h3>
+      <h3 className="text-white font-black text-lg sm:text-xl mb-2">{card.title}</h3>
       <p className="text-white/70 leading-relaxed text-sm">{card.desc}</p>
     </article>
   )
@@ -67,14 +67,14 @@ export default function SampleSection({ onBuy, onOpenSample, content = {}, setti
   ]
 
   return (
-    <section id="samples" className="dark-section-bg py-20 px-4 sm:px-10 lg:px-20 text-center">
+    <section id="samples" className="dark-section-bg py-16 sm:py-20 px-4 sm:px-10 lg:px-20 text-center">
       <span className="inline-flex items-center justify-center min-h-[34px] px-4 rounded-full bg-[#ffd02a] text-black text-xs font-black uppercase mb-4">
         {content.sampleKicker || 'Free Preview'}
       </span>
-      <h2 className="text-white font-black mb-3" style={{ fontSize: 'clamp(32px, 6vw, 68px)' }}>
+      <h2 className="text-white font-black mb-3" style={{ fontSize: 'clamp(26px, 5vw, 68px)' }}>
         {content.sampleHeading || '3 sample prompts play karke dekho'}
       </h2>
-      <p className="text-white/72 text-lg leading-relaxed max-w-[760px] mx-auto mb-10">
+      <p className="text-white/72 text-base sm:text-lg leading-relaxed max-w-[760px] mx-auto mb-8 sm:mb-10">
         {content.sampleIntro || 'Buyer ko landing page par hi idea mil jayega ki PDF bundle me kis type ke ready prompts milne wale hain.'}
       </p>
 
