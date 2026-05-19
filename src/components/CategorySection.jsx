@@ -9,14 +9,14 @@ const CATS = [
   { css: 'mini-art',     badge: 'Creative',     title: 'Miniature & Viral Concepts',   desc: 'Surreal miniature worlds, viral scene ideas aur unique scroll-stopping concepts.' },
 ]
 
-export default function CategorySection() {
+export default function CategorySection({ content = {} }) {
   return (
     <section id="categories" className="py-20 px-4 sm:px-10 lg:px-20 text-center bg-[#070707]">
       <span className="inline-flex items-center justify-center min-h-[34px] px-4 rounded-full bg-[#ffd02a] text-black text-xs font-black uppercase mb-4">
-        Almost Every Specialized Prompt Category Included
+        {content.categoryKicker || 'Almost Every Specialized Prompt Category Included'}
       </span>
       <h2 className="text-white font-black mb-10" style={{ fontSize: 'clamp(32px, 6vw, 68px)' }}>
-        Har niche ke liye ready prompt packs
+        {content.categoryHeading || 'Har niche ke liye ready prompt packs'}
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

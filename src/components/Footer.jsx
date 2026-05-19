@@ -1,9 +1,9 @@
-import { PRODUCT } from '../App'
-
-export default function Footer() {
+export default function Footer({ content = {} }) {
   return (
     <footer className="grid gap-3 px-4 sm:px-12 py-8 border-t border-white/10 bg-[#050505] text-center text-white/60 text-sm">
-      <p className="font-black text-white/80">Copyright &copy; {new Date().getFullYear()} {PRODUCT.brand}</p>
+      <p className="font-black text-white/80">
+        {content.footerCopyright || `Copyright © ${new Date().getFullYear()} Market Prompt Hub`}
+      </p>
       <div className="flex justify-center gap-5">
         <a href="#" className="text-white font-black hover:text-[#ffd02a] transition-colors">Privacy Policy</a>
         <a href="#" className="text-white font-black hover:text-[#ffd02a] transition-colors">Terms</a>

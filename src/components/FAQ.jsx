@@ -17,7 +17,7 @@ const FAQS = [
   },
 ]
 
-export default function FAQ() {
+export default function FAQ({ content = {} }) {
   return (
     <section id="faq" className="py-20 px-4 sm:px-10 lg:px-20 bg-[#070707]">
       <div className="max-w-[1040px] mx-auto">
@@ -25,7 +25,7 @@ export default function FAQ() {
           Frequently Asked Questions
         </span>
         <h2 className="text-white font-black mb-8" style={{ fontSize: 'clamp(32px, 6vw, 68px)' }}>
-          Common questions
+          {content.faqHeading || 'Common questions'}
         </h2>
 
         <div>

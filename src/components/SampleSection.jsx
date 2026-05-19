@@ -1,29 +1,5 @@
 import { useState } from 'react'
 
-const CARDS = [
-  {
-    id: 'image',
-    css: 'image-sample',
-    title: 'Viral Image Prompt',
-    desc: 'Hyper-realistic cinematic AI image prompt for social media posts.',
-    prompt: 'A hyper-realistic cinematic portrait of an Indian woman in a golden saree, standing in a palace courtyard at sunset. Dramatic lighting, shallow depth of field, fashion editorial style, 8K resolution.',
-  },
-  {
-    id: 'reel',
-    css: 'reel-sample',
-    title: 'Reels & Shorts Prompt',
-    desc: 'Fast video concept, hook, camera movement aur caption prompt sample.',
-    prompt: 'Create a 30-second viral reel: Open with a fast zoom-in on a product. Hook text: "Maine sirf Rs.199 mein 10 lakh prompts kharide". Add trending transition effects, upbeat background music cue, and a strong CTA in the last 5 seconds.',
-  },
-  {
-    id: 'product',
-    css: 'prod-sample',
-    title: 'Product Ad Prompt',
-    desc: 'Brand product mockup, lighting, scene and ad copy prompt sample.',
-    prompt: 'Premium product photography: A luxury perfume bottle placed on a black marble surface with cinematic side lighting. Smoke wisps, deep shadows, and golden reflections. Magazine cover quality, brand-ready composition.',
-  },
-]
-
 function SampleCard({ card, onOpen }) {
   const [playing, setPlaying] = useState(false)
 
@@ -33,7 +9,6 @@ function SampleCard({ card, onOpen }) {
       onClick={() => !playing && onOpen(card)}
     >
       <div className={`media-screen min-h-[230px] mb-4 ${card.css} ${playing ? 'is-playing' : ''}`}>
-        {/* Play button */}
         <button
           className="play-overlay absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[72px] h-[72px] rounded-full bg-[#ffd02a] shadow-[0_0_0_12px_rgba(255,208,42,0.18)] grid place-items-center text-black text-2xl font-black z-10 border-0 cursor-pointer hover:scale-110 transition-transform"
           onClick={(e) => { e.stopPropagation(); setPlaying(true) }}
@@ -42,7 +17,6 @@ function SampleCard({ card, onOpen }) {
           ▶
         </button>
 
-        {/* Close button when playing */}
         <button
           className="close-overlay hidden absolute top-3 right-3 z-10 w-9 h-9 rounded-full border-0 bg-black/60 text-white text-lg cursor-pointer items-center justify-content-center backdrop-blur-sm"
           style={{ display: playing ? 'flex' : 'none', alignItems: 'center', justifyContent: 'center' }}
@@ -52,7 +26,6 @@ function SampleCard({ card, onOpen }) {
           ✕
         </button>
 
-        {/* Playing indicator */}
         {playing && (
           <div className="absolute inset-0 z-[3] flex flex-col items-center justify-center gap-2">
             <div className="flex gap-1 items-end h-8">
@@ -79,21 +52,27 @@ function SampleCard({ card, onOpen }) {
   )
 }
 
-export default function SampleSection({ onBuy, onOpenSample }) {
+export default function SampleSection({ onBuy, onOpenSample, content = {} }) {
+  const cards = [
+    { id: 'image',   css: 'image-sample', title: content.sample1Title || 'Viral Image Prompt',    desc: content.sample1Text || 'Hyper-realistic cinematic AI image prompt for social media posts.',     prompt: content.sample1Prompt || '' },
+    { id: 'reel',    css: 'reel-sample',  title: content.sample2Title || 'Reels & Shorts Prompt',  desc: content.sample2Text || 'Fast video concept, hook, camera movement aur caption prompt sample.', prompt: content.sample2Prompt || '' },
+    { id: 'product', css: 'prod-sample',  title: content.sample3Title || 'Product Ad Prompt',      desc: content.sample3Text || 'Brand product mockup, lighting, scene and ad copy prompt sample.',    prompt: content.sample3Prompt || '' },
+  ]
+
   return (
     <section id="samples" className="dark-section-bg py-20 px-4 sm:px-10 lg:px-20 text-center">
       <span className="inline-flex items-center justify-center min-h-[34px] px-4 rounded-full bg-[#ffd02a] text-black text-xs font-black uppercase mb-4">
-        Free Preview
+        {content.sampleKicker || 'Free Preview'}
       </span>
       <h2 className="text-white font-black mb-3" style={{ fontSize: 'clamp(32px, 6vw, 68px)' }}>
-        3 sample prompts play karke dekho
+        {content.sampleHeading || '3 sample prompts play karke dekho'}
       </h2>
       <p className="text-white/72 text-lg leading-relaxed max-w-[760px] mx-auto mb-10">
-        Buyer ko landing page par hi idea mil jayega ki PDF bundle me kis type ke ready prompts milne wale hain.
+        {content.sampleIntro || 'Buyer ko landing page par hi idea mil jayega ki PDF bundle me kis type ke ready prompts milne wale hain.'}
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {CARDS.map(card => (
+        {cards.map(card => (
           <SampleCard key={card.id} card={card} onOpen={onOpenSample} />
         ))}
       </div>

@@ -5,14 +5,14 @@ const ITEMS = [
   { title: 'Works Everywhere',     desc: 'Gemini, Midjourney, Sora, DALL-E, Leonardo aur other AI tools ke saath compatible.' },
 ]
 
-export default function Benefits() {
+export default function Benefits({ content = {} }) {
   return (
     <section className="py-20 px-4 sm:px-10 lg:px-20 text-center bg-[#070707]">
       <span className="inline-flex items-center justify-center min-h-[34px] px-4 rounded-full bg-[#ffd02a] text-black text-xs font-black uppercase mb-4">
         Why Creators Love This Bundle
       </span>
       <h2 className="text-white font-black mb-10" style={{ fontSize: 'clamp(32px, 6vw, 68px)' }}>
-        Content banana fast, easy aur profitable.
+        {content.benefitHeading || 'Content banana fast, easy aur profitable.'}
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

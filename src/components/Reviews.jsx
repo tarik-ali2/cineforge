@@ -4,14 +4,14 @@ const REVIEWS = [
   { text: '"Client work fast deliver ho raha hai. Beginners ke liye bhi prompts easy language me hain."', name: 'Nisha B., Kolkata' },
 ]
 
-export default function Reviews() {
+export default function Reviews({ content = {} }) {
   return (
     <section id="reviews" className="py-20 px-4 sm:px-10 lg:px-20 text-center bg-[#0a0a0d]">
       <span className="inline-flex items-center justify-center min-h-[34px] px-4 rounded-full bg-[#ffd02a] text-black text-xs font-black uppercase mb-4">
         Happy Customers
       </span>
       <h2 className="text-white font-black mb-10" style={{ fontSize: 'clamp(32px, 6vw, 68px)' }}>
-        Creators ka response
+        {content.reviewHeading || 'Creators ka response'}
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

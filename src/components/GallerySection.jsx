@@ -51,14 +51,14 @@ function GalleryCard({ item }) {
   )
 }
 
-export default function GallerySection() {
+export default function GallerySection({ content = {} }) {
   return (
     <section className="dark-section-bg py-20 px-4 sm:px-10 lg:px-20 text-center">
       <span className="inline-flex items-center justify-center min-h-[34px] px-4 rounded-full bg-[#ffd02a] text-black text-xs font-black uppercase mb-4">
-        Bundle Preview
+        {content.galleryKicker || 'Bundle Preview'}
       </span>
       <h2 className="text-white font-black mb-10" style={{ fontSize: 'clamp(32px, 6vw, 68px)' }}>
-        Is PDF me aise digital product prompt packs milenge
+        {content.galleryHeading || 'Is PDF me aise digital product prompt packs milenge'}
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -1,10 +1,8 @@
-import { PRODUCT } from '../App'
-
-export default function Header({ onBuy }) {
+export default function Header({ onBuy, content = {} }) {
   return (
     <header className="sticky top-0 z-40 flex items-center justify-between gap-4 px-4 sm:px-10 lg:px-[70px] py-4 border-b border-white/10 bg-[rgba(7,7,7,0.88)] backdrop-blur-xl">
       <a href="#top" className="text-[#ffd02a] font-black text-xl tracking-tight">
-        {PRODUCT.brand}
+        {content.brandName || 'Market Prompt Hub'}
       </a>
 
       <nav className="flex items-center gap-5">
