@@ -382,6 +382,18 @@ async function sendEmail(s, lead, paymentId, pdfUrl, pdfFilePath, pdfFileName) {
   });
 }
 
+// ── SPA Fallback ──────────────────────────────────────────────────────────────
+
+// /admin/* → React app (Admin component handles routing client-side)
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')));
+app.get('/admin/*', (req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')));
+// Catch-all for React landing page
+app.get('*', (req, res) => {
+  const filePath = path.join(__dirname, 'dist', 'index.html');
+  if (fs.existsSync(filePath)) res.sendFile(filePath);
+  else res.status(404).send('Build not found. Run: npm run build');
+});
+
 // ── Start ─────────────────────────────────────────────────────────────────────
 
 connectDB().then(() => {
