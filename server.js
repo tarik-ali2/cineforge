@@ -177,9 +177,8 @@ app.use('/api', (req, res, next) => { res.set('Cache-Control', 'no-store'); next
 
 // Serve built React app
 app.use(express.static(path.join(__dirname, 'dist')));
-// Admin panel (not part of React build)
-app.get('/admin.html', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
-app.get('/admin.js',   (req, res) => res.sendFile(path.join(__dirname, 'admin.js')));
+// Serve root-level files: admin.html, admin.js, styles.css, assets/
+app.use(express.static(path.join(__dirname), { index: false, dotfiles: 'ignore' }));
 // Uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
