@@ -101,7 +101,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#070707] text-white" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif' }}>
-      <Toast msg={toastMsg} visible={toastVisible} />
+
       <Header onBuy={openBuy} content={content} />
 
       <main id="top" className="pb-28 sm:pb-32">
