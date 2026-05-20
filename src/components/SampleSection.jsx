@@ -22,6 +22,7 @@ function SampleCard({ card, onOpen }) {
       : {}
 
   const fallbackCss = card.imgPath ? '' : card.css
+  const mediaSizeClass = (ytId || vidFile) ? 'aspect-[9/16]' : 'min-h-[200px] sm:min-h-[230px]'
 
   return (
     <article
@@ -29,7 +30,7 @@ function SampleCard({ card, onOpen }) {
       onClick={() => !playing && onOpen(card)}
     >
       <div
-        className={`media-screen min-h-[200px] sm:min-h-[230px] mb-4 ${fallbackCss}`}
+        className={`media-screen ${mediaSizeClass} mb-4 ${fallbackCss}`}
         style={!playing ? thumbStyle : {}}
       >
         {/* YouTube embed when playing */}

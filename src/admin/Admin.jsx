@@ -447,10 +447,29 @@ function Media({ settings, onRefresh }) {
 
   return (
     <Page title="Media Manager" action={msg && <span style={{ color: msg.startsWith('✓') ? '#22c55e' : msg.startsWith('⚠') ? '#f59e0b' : '#dc2626', fontWeight: 600 }}>{msg}</span>}>
-      <div style={{ background: '#eff6ff', border: '1px solid #93c5fd', borderRadius: 10, padding: '14px 16px', marginBottom: 20, fontSize: 13, color: '#1e3a5f', lineHeight: 1.8 }}>
-        <strong>📌 Image ke liye:</strong> <a href="https://imgbb.com" target="_blank" rel="noreferrer" style={{ color: '#1d4ed8' }}>imgbb.com</a> pe image upload karo → "Direct link" copy karo → neeche URL box mein paste karo → <strong>URL Save</strong> click karo.<br />
-        <strong>🎬 Video ke liye:</strong> YouTube par video upload karo → URL copy karo (jaise <code>https://youtube.com/watch?v=ABC123</code>) → URL box mein paste karo → <strong>URL Save</strong> click karo. Landing page par ▶ button click karne se video play hogi.<br />
-        <strong>⚠️ File upload:</strong> Directly upload ki files server restart pe delete ho jaati hain — URL method use karo.
+      {/* Size Guide */}
+      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: '14px 16px', marginBottom: 16 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 10 }}>📐 Recommended Sizes</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+          {[
+            { icon: '🖼️', label: 'Image (Hero / Gallery / Category)', size: '1280×720px ya 1080×1080px · JPG/PNG · max 3MB' },
+            { icon: '📹', label: 'Video (Sample / Gallery cards)', size: '1080×1920px (vertical reel) ya 1280×720px · MP4 · max 50MB' },
+            { icon: '📄', label: 'PDF', size: 'Koi bhi size · max 25MB' },
+          ].map(r => (
+            <div key={r.label} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '10px 12px' }}>
+              <div style={{ fontSize: 18, marginBottom: 4 }}>{r.icon}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#0f172a', marginBottom: 3 }}>{r.label}</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>{r.size}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* How to add */}
+      <div style={{ background: '#eff6ff', border: '1px solid #93c5fd', borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 13, color: '#1e3a5f', lineHeight: 1.8 }}>
+        <strong>📌 Image:</strong> <a href="https://imgbb.com" target="_blank" rel="noreferrer" style={{ color: '#1d4ed8' }}>imgbb.com</a> → upload → "Direct link" copy → URL box paste → <strong>URL Save</strong><br />
+        <strong>🎬 Video:</strong> YouTube par upload karo → URL copy (<code>youtube.com/watch?v=...</code>) → URL box paste → <strong>URL Save</strong> → card mein ▶ click pe play hogi<br />
+        <strong>⚠️</strong> File upload se files server restart pe delete ho jaati hain — URL method recommended hai.
       </div>
 
       <div style={{ display: 'grid', gap: 20, maxWidth: 760 }}>

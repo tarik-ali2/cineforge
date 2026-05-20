@@ -30,11 +30,12 @@ function GalleryCard({ item }) {
       : {}
 
   const fallbackCss = item.imgPath ? '' : item.css
+  const mediaSizeClass = (ytId || vidFile) ? 'aspect-[9/16]' : 'min-h-[250px]'
 
   return (
     <article className="p-4 border border-white/12 rounded-[18px] bg-gradient-to-b from-white/[0.08] to-white/[0.03] shadow-[0_24px_60px_rgba(0,0,0,0.3)] text-left hover:border-[rgba(255,208,42,0.45)] hover:-translate-y-1 transition-all duration-200">
       <div
-        className={`media-screen min-h-[250px] mb-4 ${fallbackCss}`}
+        className={`media-screen ${mediaSizeClass} mb-4 ${fallbackCss}`}
         style={!playing ? thumbStyle : {}}
       >
         {/* YouTube embed when playing */}
@@ -102,7 +103,7 @@ export default function GallerySection({ content = {}, settings = {} }) {
       <h2 className="text-white font-black mb-8 sm:mb-10" style={{ fontSize: 'clamp(26px, 5vw, 68px)' }}>
         {content.galleryHeading || 'Is PDF me aise digital product prompt packs milenge'}
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {items.map(item => <GalleryCard key={item.id} item={item} />)}
       </div>
     </section>
