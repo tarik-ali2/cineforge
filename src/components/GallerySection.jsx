@@ -1,10 +1,9 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 
 const FALLBACK = [
-  { id: 1, css: 'g-one',   title: 'Image Creation Prompts' },
-  { id: 2, css: 'g-two',   title: 'Video & Reels Prompts' },
-  { id: 3, css: 'g-three', title: 'Business Ad Prompts' },
-  { id: 4, css: 'g-four',  title: 'Festival & Event Prompts' },
+  { id: 1, css: 'g-one',   title: 'Image Creation Prompts',   settingsKey: 'gallery1Path' },
+  { id: 3, css: 'g-three', title: 'Business Ad Prompts',      settingsKey: 'gallery3Path' },
+  { id: 4, css: 'g-four',  title: 'Festival & Event Prompts', settingsKey: 'gallery4Path' },
 ]
 
 function getYouTubeId(url) {
@@ -14,7 +13,7 @@ function getYouTubeId(url) {
 }
 const isVideoFile = src => /\.(mp4|mov|webm|avi|mkv)$/i.test(src || '')
 
-function GalleryCard({ item }) {
+function GalleryCard({ item, onPlayChange }) {
   const [playing, setPlaying] = useState(false)
 
   const ytId    = getYouTubeId(item.imgPath)
@@ -29,6 +28,9 @@ function GalleryCard({ item }) {
 
   const fallbackCss = item.imgPath ? '' : item.css
   const aspectClass = (ytId || vidFile) ? 'aspect-[9/16]' : 'aspect-square'
+
+  const startPlay = () => { setPlaying(true); onPlayChange(true) }
+  const stopPlay  = () => { setPlaying(false); onPlayChange(false) }
 
   return (
     <div className="border border-white/12 rounded-[16px] bg-gradient-to-b from-white/[0.08] to-white/[0.03] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden hover:border-[rgba(255,208,42,0.45)] transition-all duration-200">
@@ -51,12 +53,12 @@ function GalleryCard({ item }) {
         {!(playing && (ytId || vidFile)) && (
           <button
             className="play-overlay absolute inset-0 m-auto w-12 h-12 rounded-full bg-black/55 border-2 border-white/70 text-white text-base grid place-items-center z-10 cursor-pointer backdrop-blur-sm hover:bg-[rgba(255,208,42,0.8)] hover:text-black hover:scale-110 transition-all border-solid"
-            onClick={() => setPlaying(p => !p)}
-          >{playing ? '❚❚' : '▶'}</button>
+            onClick={startPlay}
+          >▶</button>
         )}
         {playing && (
           <button className="absolute top-2 right-2 z-20 w-7 h-7 rounded-full bg-black/70 text-white text-xs cursor-pointer flex items-center justify-center border-0"
-            onClick={() => setPlaying(false)}>✕</button>
+            onClick={stopPlay}>✕</button>
         )}
         {playing && !ytId && !vidFile && (
           <div className="absolute inset-0 z-[3] flex items-center justify-center">
@@ -75,10 +77,47 @@ function GalleryCard({ item }) {
 }
 
 export default function GallerySection({ content = {}, settings = {} }) {
-  const items = FALLBACK.map((f, i) => ({
+  const [activeIdx, setActiveIdx] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const trackRef = useRef(null)
+  const activeIdxRef = useRef(0)
+
+  const items = FALLBACK.map(f => ({
     ...f,
-    imgPath: settings[`gallery${i + 1}Path`] || '',
+    imgPath: settings[f.settingsKey] || '',
   }))
+
+  const goTo = useCallback((idx) => {
+    const track = trackRef.current
+    if (!track || !track.firstChild) return
+    const cardWidth = track.firstChild.offsetWidth + 14
+    track.scrollTo({ left: idx * cardWidth, behavior: 'smooth' })
+    activeIdxRef.current = idx
+    setActiveIdx(idx)
+  }, [])
+
+  useEffect(() => {
+    const track = trackRef.current
+    if (!track) return
+    const onScroll = () => {
+      const card = track.firstChild
+      if (!card) return
+      const idx = Math.round(track.scrollLeft / (card.offsetWidth + 14))
+      activeIdxRef.current = idx
+      setActiveIdx(idx)
+    }
+    track.addEventListener('scroll', onScroll, { passive: true })
+    return () => track.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
+    if (isPlaying) return
+    const interval = setInterval(() => {
+      const next = (activeIdxRef.current + 1) % items.length
+      goTo(next)
+    }, 3500)
+    return () => clearInterval(interval)
+  }, [isPlaying, items.length, goTo])
 
   return (
     <section className="dark-section-bg py-12 sm:py-16 px-4 sm:px-10 lg:px-20">
@@ -91,12 +130,21 @@ export default function GallerySection({ content = {}, settings = {} }) {
         </h2>
       </div>
 
-      {/* Horizontal slider */}
-      <div className="slider-track">
+      <div ref={trackRef} className="slider-track">
         {items.map(item => (
-          <div key={item.id} className="w-[72vw] sm:w-[280px] lg:w-[300px]">
-            <GalleryCard item={item} />
+          <div key={item.id} className="w-[92vw] sm:w-[380px] lg:w-[420px]">
+            <GalleryCard item={item} onPlayChange={setIsPlaying} />
           </div>
+        ))}
+      </div>
+
+      <div className="flex justify-center items-center gap-2 mt-4">
+        {items.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => goTo(i)}
+            className={`h-2 rounded-full border-0 cursor-pointer transition-all duration-300 ${i === activeIdx ? 'bg-[#ffd02a] w-5' : 'bg-white/30 w-2'}`}
+          />
         ))}
       </div>
     </section>

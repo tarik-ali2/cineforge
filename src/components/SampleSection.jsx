@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 
 function getYouTubeId(url) {
   if (!url) return null
@@ -8,7 +8,7 @@ function getYouTubeId(url) {
 
 const isVideoFile = src => /\.(mp4|mov|webm|avi|mkv)$/i.test(src || '')
 
-function SampleCard({ card, onOpen }) {
+function SampleCard({ card, onOpen, onPlayChange }) {
   const [playing, setPlaying] = useState(false)
 
   const ytId    = getYouTubeId(card.imgPath)
@@ -22,7 +22,10 @@ function SampleCard({ card, onOpen }) {
       : {}
 
   const fallbackCss = card.imgPath ? '' : card.css
-  const mediaSizeClass = (ytId || vidFile) ? 'aspect-[9/16]' : 'aspect-square'
+  const mediaSizeClass = (card.id === 'reel' || ytId || vidFile) ? 'aspect-[9/16]' : 'aspect-square'
+
+  const startPlay = () => { setPlaying(true); onPlayChange(true) }
+  const stopPlay  = () => { setPlaying(false); onPlayChange(false) }
 
   return (
     <article
@@ -33,7 +36,6 @@ function SampleCard({ card, onOpen }) {
         className={`media-screen ${mediaSizeClass} mb-4 ${fallbackCss}`}
         style={!playing ? thumbStyle : {}}
       >
-        {/* YouTube embed when playing */}
         {playing && ytId && (
           <iframe
             src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`}
@@ -42,30 +44,23 @@ function SampleCard({ card, onOpen }) {
             allowFullScreen
           />
         )}
-
-        {/* Direct video file when playing */}
         {playing && vidFile && (
           <video src={card.imgPath} autoPlay controls
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 5 }} />
         )}
 
-        {/* Play button */}
         {!(playing && (ytId || vidFile)) && (
           <button
             className="play-overlay absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[64px] h-[64px] sm:w-[72px] sm:h-[72px] rounded-full bg-[#ffd02a] shadow-[0_0_0_12px_rgba(255,208,42,0.18)] grid place-items-center text-black text-2xl font-black z-10 border-0 cursor-pointer hover:scale-110 transition-transform"
-            onClick={e => { e.stopPropagation(); setPlaying(true) }}
+            onClick={e => { e.stopPropagation(); startPlay() }}
           >▶</button>
         )}
-
-        {/* Close button */}
         {playing && (
           <button
             className="absolute top-3 right-3 z-20 w-9 h-9 rounded-full border-0 bg-black/70 text-white text-lg cursor-pointer flex items-center justify-center"
-            onClick={e => { e.stopPropagation(); setPlaying(false) }}
+            onClick={e => { e.stopPropagation(); stopPlay() }}
           >✕</button>
         )}
-
-        {/* Bars animation when no real media */}
         {playing && !ytId && !vidFile && (
           <div className="absolute inset-0 z-[3] flex flex-col items-center justify-center gap-2">
             <div className="flex gap-1 items-end h-8">
@@ -86,11 +81,48 @@ function SampleCard({ card, onOpen }) {
 }
 
 export default function SampleSection({ onBuy, onOpenSample, content = {}, settings = {} }) {
+  const [activeIdx, setActiveIdx] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const trackRef = useRef(null)
+  const activeIdxRef = useRef(0)
+
   const cards = [
     { id: 'image',   css: 'image-sample', imgPath: settings.sampleImagePath   || '', title: content.sample1Title || 'Viral Image Prompt',   desc: content.sample1Text || 'Hyper-realistic cinematic AI image prompt for social media posts.',     prompt: content.sample1Prompt || '' },
     { id: 'reel',    css: 'reel-sample',  imgPath: settings.sampleReelPath    || '', title: content.sample2Title || 'Reels & Shorts Prompt', desc: content.sample2Text || 'Fast video concept, hook, camera movement aur caption prompt sample.', prompt: content.sample2Prompt || '' },
     { id: 'product', css: 'prod-sample',  imgPath: settings.sampleProductPath || '', title: content.sample3Title || 'Product Ad Prompt',     desc: content.sample3Text || 'Brand product mockup, lighting, scene and ad copy prompt sample.',    prompt: content.sample3Prompt || '' },
   ]
+
+  const goTo = useCallback((idx) => {
+    const track = trackRef.current
+    if (!track || !track.firstChild) return
+    const cardWidth = track.firstChild.offsetWidth + 14
+    track.scrollTo({ left: idx * cardWidth, behavior: 'smooth' })
+    activeIdxRef.current = idx
+    setActiveIdx(idx)
+  }, [])
+
+  useEffect(() => {
+    const track = trackRef.current
+    if (!track) return
+    const onScroll = () => {
+      const card = track.firstChild
+      if (!card) return
+      const idx = Math.round(track.scrollLeft / (card.offsetWidth + 14))
+      activeIdxRef.current = idx
+      setActiveIdx(idx)
+    }
+    track.addEventListener('scroll', onScroll, { passive: true })
+    return () => track.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
+    if (isPlaying) return
+    const interval = setInterval(() => {
+      const next = (activeIdxRef.current + 1) % cards.length
+      goTo(next)
+    }, 3500)
+    return () => clearInterval(interval)
+  }, [isPlaying, cards.length, goTo])
 
   return (
     <section id="samples" className="dark-section-bg py-16 sm:py-20 px-4 sm:px-10 lg:px-20 text-center">
@@ -103,11 +135,22 @@ export default function SampleSection({ onBuy, onOpenSample, content = {}, setti
       <p className="text-white/72 text-base sm:text-lg leading-relaxed max-w-[760px] mx-auto mb-8 sm:mb-10">
         {content.sampleIntro || 'Buyer ko landing page par hi idea mil jayega ki PDF bundle me kis type ke ready prompts milne wale hain.'}
       </p>
-      <div className="slider-track">
+
+      <div ref={trackRef} className="slider-track">
         {cards.map(card => (
-          <div key={card.id} className="w-[78vw] sm:w-[320px] lg:w-[360px]">
-            <SampleCard card={card} onOpen={onOpenSample} />
+          <div key={card.id} className="w-[92vw] sm:w-[380px] lg:w-[420px]">
+            <SampleCard card={card} onOpen={onOpenSample} onPlayChange={setIsPlaying} />
           </div>
+        ))}
+      </div>
+
+      <div className="flex justify-center items-center gap-2 mt-4">
+        {cards.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => goTo(i)}
+            className={`h-2 rounded-full border-0 cursor-pointer transition-all duration-300 ${i === activeIdx ? 'bg-[#ffd02a] w-5' : 'bg-white/30 w-2'}`}
+          />
         ))}
       </div>
     </section>
