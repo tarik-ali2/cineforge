@@ -22,7 +22,7 @@ function SampleCard({ card, onOpen }) {
       : {}
 
   const fallbackCss = card.imgPath ? '' : card.css
-  const mediaSizeClass = (ytId || vidFile) ? 'aspect-[9/16]' : 'min-h-[200px] sm:min-h-[230px]'
+  const mediaSizeClass = 'aspect-square'
 
   return (
     <article
@@ -103,9 +103,11 @@ export default function SampleSection({ onBuy, onOpenSample, content = {}, setti
       <p className="text-white/72 text-base sm:text-lg leading-relaxed max-w-[760px] mx-auto mb-8 sm:mb-10">
         {content.sampleIntro || 'Buyer ko landing page par hi idea mil jayega ki PDF bundle me kis type ke ready prompts milne wale hain.'}
       </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="slider-track">
         {cards.map(card => (
-          <SampleCard key={card.id} card={card} onOpen={onOpenSample} />
+          <div key={card.id} className="w-[78vw] sm:w-[320px] lg:w-[360px]">
+            <SampleCard card={card} onOpen={onOpenSample} />
+          </div>
         ))}
       </div>
     </section>

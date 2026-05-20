@@ -177,6 +177,20 @@ details p { color: rgba(255,255,255,0.72); line-height: 1.65; margin-top: 12px; 
   padding: 16px;
 }
 
+/* ── Horizontal slider ─────────────────────────────────── */
+.slider-track {
+  display: flex;
+  overflow-x: auto;
+  gap: 14px;
+  padding-bottom: 12px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.slider-track::-webkit-scrollbar { display: none; }
+.slider-track > * { scroll-snap-align: start; flex-shrink: 0; }
+
 /* ── Responsive ────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .gradient-text, .chip-float, .animate-hero-rise, .animate-hero-fade { animation: none; }
