@@ -126,6 +126,7 @@ html { scroll-behavior: smooth; }
     repeating-linear-gradient(0deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 14px);
   transform: translateX(-100%);
   z-index: 1;
+  pointer-events: none;
 }
 .media-screen:hover::before { animation: scan 1.5s linear infinite; }
 
