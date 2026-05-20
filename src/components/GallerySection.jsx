@@ -28,12 +28,12 @@ function GalleryCard({ item }) {
       : {}
 
   const fallbackCss = item.imgPath ? '' : item.css
+  const aspectClass = (ytId || vidFile) ? 'aspect-[9/16]' : 'aspect-square'
 
   return (
     <div className="border border-white/12 rounded-[16px] bg-gradient-to-b from-white/[0.08] to-white/[0.03] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden hover:border-[rgba(255,208,42,0.45)] transition-all duration-200">
-      {/* Square media area */}
       <div
-        className={`media-screen aspect-square ${fallbackCss}`}
+        className={`media-screen ${aspectClass} ${fallbackCss}`}
         style={!playing ? thumbStyle : {}}
       >
         {playing && ytId && (

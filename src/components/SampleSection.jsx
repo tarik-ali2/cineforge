@@ -22,7 +22,7 @@ function SampleCard({ card, onOpen }) {
       : {}
 
   const fallbackCss = card.imgPath ? '' : card.css
-  const mediaSizeClass = 'aspect-square'
+  const mediaSizeClass = (ytId || vidFile) ? 'aspect-[9/16]' : 'aspect-square'
 
   return (
     <article
