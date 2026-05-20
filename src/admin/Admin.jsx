@@ -404,7 +404,7 @@ function MediaField({ label, field, accept, hint, settings, uploading, onUpload,
       </div>
       <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
         <input type="url" value={urlInput} onChange={e => setUrlInput(e.target.value)}
-          placeholder="Ya seedha image URL paste karo (imgbb.com ya koi bhi)"
+          placeholder="Image URL (imgbb.com) ya YouTube URL paste karo"
           style={{ flex: 1, padding: '7px 10px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 12, outline: 'none' }}
           onKeyDown={e => e.key === 'Enter' && handleSave()}
         />
@@ -447,37 +447,37 @@ function Media({ settings, onRefresh }) {
 
   return (
     <Page title="Media Manager" action={msg && <span style={{ color: msg.startsWith('✓') ? '#22c55e' : msg.startsWith('⚠') ? '#f59e0b' : '#dc2626', fontWeight: 600 }}>{msg}</span>}>
-      <div style={{ background: '#fffbeb', border: '1px solid #fbbf24', borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 13, color: '#92400e', lineHeight: 1.6 }}>
-        <strong>⚠️ Important:</strong> Render ke server par uploaded files restart pe delete ho jate hain.<br />
-        <strong>Best option:</strong> Kisi bhi image ko <a href="https://imgbb.com" target="_blank" rel="noreferrer" style={{ color: '#b45309' }}>imgbb.com</a> par upload karo (free, no signup) → URL copy karo → "URL Save" karo.<br />
-        <strong>Ya</strong> Render env vars mein <code>CLOUDINARY_CLOUD_NAME</code>, <code>CLOUDINARY_API_KEY</code>, <code>CLOUDINARY_API_SECRET</code> set karo (free at cloudinary.com).
+      <div style={{ background: '#eff6ff', border: '1px solid #93c5fd', borderRadius: 10, padding: '14px 16px', marginBottom: 20, fontSize: 13, color: '#1e3a5f', lineHeight: 1.8 }}>
+        <strong>📌 Image ke liye:</strong> <a href="https://imgbb.com" target="_blank" rel="noreferrer" style={{ color: '#1d4ed8' }}>imgbb.com</a> pe image upload karo → "Direct link" copy karo → neeche URL box mein paste karo → <strong>URL Save</strong> click karo.<br />
+        <strong>🎬 Video ke liye:</strong> YouTube par video upload karo → URL copy karo (jaise <code>https://youtube.com/watch?v=ABC123</code>) → URL box mein paste karo → <strong>URL Save</strong> click karo. Landing page par ▶ button click karne se video play hogi.<br />
+        <strong>⚠️ File upload:</strong> Directly upload ki files server restart pe delete ho jaati hain — URL method use karo.
       </div>
 
       <div style={{ display: 'grid', gap: 20, maxWidth: 760 }}>
 
         <Card title="📄 PDF Bundle">
-          <MediaField {...mfProps} label="PDF File" field="pdf" accept=".pdf" hint="Customer download karega" />
+          <MediaField {...mfProps} label="PDF File" field="pdf" accept=".pdf" hint="Customer download karega — Google Drive public link bhi kaam karta hai" />
         </Card>
 
         <Card title="🖼️ Hero Image">
-          <MediaField {...mfProps} label="Main Banner Image" field="heroImage" accept="image/*" hint="1280×720px JPG/PNG" />
+          <MediaField {...mfProps} label="Main Banner Image" field="heroImage" accept="image/*" hint="imgbb.com se URL paste karo" />
         </Card>
 
-        <Card title="🎬 Sample Cards (3)">
-          <MediaField {...mfProps} label="Sample 1 — Viral Image Prompt" field="sampleImage"   accept="image/*,video/*" hint="Image ya Video" />
-          <MediaField {...mfProps} label="Sample 2 — Reels & Shorts"     field="sampleReel"    accept="video/*"         hint="MP4 video" />
-          <MediaField {...mfProps} label="Sample 3 — Product Ad"          field="sampleProduct" accept="image/*,video/*" hint="Image ya Video" />
+        <Card title="🎬 Sample Cards — Image ya YouTube URL">
+          <MediaField {...mfProps} label="Sample 1" field="sampleImage"   accept="image/*,video/*" hint="Image URL (imgbb) ya YouTube video URL" />
+          <MediaField {...mfProps} label="Sample 2" field="sampleReel"    accept="video/*"         hint="YouTube video URL paste karo" />
+          <MediaField {...mfProps} label="Sample 3" field="sampleProduct" accept="image/*,video/*" hint="Image URL (imgbb) ya YouTube video URL" />
         </Card>
 
-        <Card title="🖼️ Gallery Cards (4)">
+        <Card title="🖼️ Gallery Cards — Image ya YouTube URL">
           {[1,2,3,4].map(n => (
-            <MediaField key={n} {...mfProps} label={`Gallery ${n}`} field={`gallery${n}`} accept="image/*,video/*" hint="1280×720 JPG/PNG" />
+            <MediaField key={n} {...mfProps} label={`Gallery ${n}`} field={`gallery${n}`} accept="image/*,video/*" hint="Image URL (imgbb) ya YouTube URL — click pe play hoga" />
           ))}
         </Card>
 
-        <Card title="📂 Category Images (8)">
+        <Card title="📂 Category Images (8) — imgbb.com URL paste karo">
           {[1,2,3,4,5,6,7,8].map(n => (
-            <MediaField key={n} {...mfProps} label={`Category ${n}`} field={`cat${n}`} accept="image/*" hint="1280×720 JPG/PNG" />
+            <MediaField key={n} {...mfProps} label={`Category ${n}`} field={`cat${n}`} accept="image/*" hint="imgbb.com se direct link paste karo" />
           ))}
         </Card>
 
