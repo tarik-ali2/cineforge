@@ -20,14 +20,18 @@ const MONGO_URI = process.env.MONGO_URI;
 let db = null;
 
 async function connectDB() {
-  if (!MONGO_URI) return;
+  if (!MONGO_URI) {
+    console.warn('⚠️  MONGO_URI not set — data will be lost on restart!');
+    return;
+  }
+  console.log('🔄 Connecting to MongoDB...');
   try {
-    const client = new MongoClient(MONGO_URI);
+    const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 10000 });
     await client.connect();
     db = client.db('cineforge');
-    console.log('MongoDB connected');
+    console.log('✅ MongoDB connected successfully!');
   } catch (err) {
-    console.error('MongoDB connection failed:', err.message);
+    console.error('❌ MongoDB connection failed:', err.message);
   }
 }
 
