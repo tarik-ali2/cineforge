@@ -475,28 +475,44 @@ function Media({ settings, onRefresh }) {
       <div style={{ display: 'grid', gap: 20, maxWidth: 760 }}>
 
         <Card title="📄 PDF Bundle">
-          <MediaField {...mfProps} label="PDF File" field="pdf" accept=".pdf" hint="Customer download karega — Google Drive public link bhi kaam karta hai" />
+          <MediaField {...mfProps} label="PDF File — Customer yahi download karega" field="pdf" accept=".pdf" hint="Google Drive public link ya direct PDF URL" />
         </Card>
 
-        <Card title="🖼️ Hero Image">
-          <MediaField {...mfProps} label="Main Banner Image" field="heroImage" accept="image/*" hint="imgbb.com se URL paste karo" />
+        <Card title="🖼️ Hero Section — Sabse upar ki image">
+          <MediaField {...mfProps} label="Hero Banner Image — Landing page ke top par dikhti hai" field="heroImage" accept="image/*" hint="imgbb.com se URL paste karo · 1280×720px recommended" />
         </Card>
 
-        <Card title="🎬 Sample Cards — Image ya YouTube URL">
-          <MediaField {...mfProps} label="Sample 1" field="sampleImage"   accept="image/*,video/*" hint="Image URL (imgbb) ya YouTube video URL" />
-          <MediaField {...mfProps} label="Sample 2" field="sampleReel"    accept="video/*"         hint="YouTube video URL paste karo" />
-          <MediaField {...mfProps} label="Sample 3" field="sampleProduct" accept="image/*,video/*" hint="Image URL (imgbb) ya YouTube video URL" />
+        <Card title="🎬 Free Preview — 3 Sample Cards (landing page par 'Free Preview' section)">
+          <div style={{ background: '#fef9c3', border: '1px solid #fbbf24', borderRadius: 8, padding: '10px 14px', marginBottom: 8, fontSize: 13, color: '#92400e' }}>
+            💡 <strong>Tip:</strong> YouTube URL paste karo → URL Save → landing page refresh karo → card pe ▶ click karo
+          </div>
+          <MediaField {...mfProps} label="Card 1 — 'Viral Image Prompt' (left card)" field="sampleImage" accept="image/*,video/*" hint="imgbb.com image URL ya YouTube URL" />
+          <MediaField {...mfProps} label="Card 2 — 'Reels & Shorts Prompt' (middle card)" field="sampleReel" accept="video/*" hint="YouTube video URL paste karo (watch?v= ya /shorts/ dono kaam karenge)" />
+          <MediaField {...mfProps} label="Card 3 — 'Product Ad Prompt' (right card)" field="sampleProduct" accept="image/*,video/*" hint="imgbb.com image URL ya YouTube URL" />
         </Card>
 
-        <Card title="🖼️ Gallery Cards — Image ya YouTube URL">
-          {[1,2,3,4].map(n => (
-            <MediaField key={n} {...mfProps} label={`Gallery ${n}`} field={`gallery${n}`} accept="image/*,video/*" hint="Image URL (imgbb) ya YouTube URL — click pe play hoga" />
-          ))}
+        <Card title="🖼️ Bundle Preview — 3 Gallery Cards ('Bundle Preview' section mein slider)">
+          <div style={{ background: '#f0f9ff', border: '1px solid #93c5fd', borderRadius: 8, padding: '10px 14px', marginBottom: 8, fontSize: 13, color: '#1e3a5f' }}>
+            ℹ️ Gallery mein sirf <strong>Card 1, Card 3, Card 4</strong> use hote hain. Card 2 skip hota hai.
+          </div>
+          <MediaField {...mfProps} label="Gallery Card 1 — 'Image Creation Prompts'" field="gallery1" accept="image/*,video/*" hint="imgbb.com image URL ya YouTube URL" />
+          <MediaField {...mfProps} label="Gallery Card 2 — (Is waqt use nahi ho raha)" field="gallery2" accept="image/*,video/*" hint="Abhi landing page par nahi dikhega" />
+          <MediaField {...mfProps} label="Gallery Card 3 — 'Business Ad Prompts'" field="gallery3" accept="image/*,video/*" hint="imgbb.com image URL ya YouTube URL" />
+          <MediaField {...mfProps} label="Gallery Card 4 — 'Festival & Event Prompts'" field="gallery4" accept="image/*,video/*" hint="imgbb.com image URL ya YouTube URL" />
         </Card>
 
-        <Card title="📂 Category Images (8) — imgbb.com URL paste karo">
-          {[1,2,3,4,5,6,7,8].map(n => (
-            <MediaField key={n} {...mfProps} label={`Category ${n}`} field={`cat${n}`} accept="image/*" hint="imgbb.com se direct link paste karo" />
+        <Card title="📂 Category Section — 8 Images ('Har niche ke liye' section mein slider)">
+          {[
+            { n: 1, name: 'Indian Wedding Prompts' },
+            { n: 2, name: 'Birthday Celebration' },
+            { n: 3, name: 'Brand Campaign' },
+            { n: 4, name: 'Divine Cinematic' },
+            { n: 5, name: 'Fashion & E-commerce' },
+            { n: 6, name: 'Interior & Real Estate' },
+            { n: 7, name: 'Jewelry Photoshoot' },
+            { n: 8, name: 'Miniature & Viral' },
+          ].map(({ n, name }) => (
+            <MediaField key={n} {...mfProps} label={`Cat ${n} — "${name}"`} field={`cat${n}`} accept="image/*" hint="imgbb.com se direct link paste karo · square image best lagti hai" />
           ))}
         </Card>
 
