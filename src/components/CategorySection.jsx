@@ -26,7 +26,7 @@ export default function CategorySection({ content = {}, settings = {} }) {
         {CATS.map((cat, i) => {
           const imgPath = settings[`cat${i + 1}Path`] || ''
           return (
-            <div key={cat.title} className="w-[52vw] sm:w-[220px] lg:w-[240px]">
+            <div key={cat.title} className="w-[62vw] sm:w-[264px] lg:w-[288px]">
               <div className="border border-white/12 rounded-[14px] bg-[#121212] overflow-hidden">
                 {/* Square image */}
                 <div

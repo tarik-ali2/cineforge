@@ -212,41 +212,49 @@ function Settings({ settings, onSave }) {
     }>
       <div style={{ display: 'grid', gap: 20, maxWidth: 720 }}>
 
-        <Card title="🛍️ Product">
+        {/* Quick guide */}
+        <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 10, padding: '14px 16px', fontSize: 13, color: '#166534', lineHeight: 1.9 }}>
+          <strong>📋 Kya kahan dalna hai — Quick Guide</strong><br />
+          <strong>Product Name</strong> → Hero section + sticky buy bar par dikhta hai<br />
+          <strong>Sale Price</strong> → "Buy Now — ₹199" button par dikhta hai<br />
+          <strong>MRP</strong> → Strikethrough price (₹4999 ~~katke~~) hero par dikhta hai<br />
+          <strong>Payment Link</strong> → Buy button click hone par yahi link khulta hai (Razorpay / Instamojo / UPI link daalo)<br />
+          <strong>PDF URL</strong> → Media Manager mein daalo — customer download karega<br />
+          <strong>Gmail</strong> → Purchase hone par customer ko confirmation email jayegi<br />
+          <strong>Webhook</strong> → Make / Zapier / Pabbly se automation ke liye (optional)
+        </div>
+
+        <Card title="🛍️ Product — Landing page par dikhne wali details">
           <FGrid>
-            <Inp label="Product Name" value={form.productName} onChange={v => set('productName', v)} placeholder="10 Lakh+ AI Prompt Bundle" />
-            <Inp label="Sale Price (₹)" value={form.price} onChange={v => set('price', v)} type="number" placeholder="199" />
-            <Inp label="MRP / Cut Price (₹)" value={form.mrp} onChange={v => set('mrp', v)} type="number" placeholder="4999" />
+            <Inp label="Product Name — Hero + buy bar par" value={form.productName} onChange={v => set('productName', v)} placeholder="10 Lakh+ AI Prompt Bundle" />
+            <Inp label="Sale Price ₹ — Buy button par dikhega" value={form.price} onChange={v => set('price', v)} type="number" placeholder="199" />
+            <Inp label="MRP ₹ — Katne wali price (strikethrough)" value={form.mrp} onChange={v => set('mrp', v)} type="number" placeholder="4999" />
           </FGrid>
         </Card>
 
-        <Card title="💳 Payment Link">
-          <Inp label="Payment Link URL — Yahan apna Razorpay / Instamojo / UPI link daalo" value={form.paymentLink} onChange={v => set('paymentLink', v)} type="url" placeholder="https://rzp.io/l/xxxxx" />
+        <Card title="💳 Payment Link — ⚠️ Sabse zaroori! Buy button yahi link kholega">
+          <Inp label="Payment Link URL — Razorpay / Instamojo / UPI payment link yahan daalo" value={form.paymentLink} onChange={v => set('paymentLink', v)} type="url" placeholder="https://rzp.io/l/xxxxx ya https://pages.razorpay.com/..." />
+          <div style={{ background: '#fef9c3', border: '1px solid #fbbf24', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#92400e', marginTop: 8 }}>
+            💡 Razorpay Payment Link kaise banaye: Razorpay Dashboard → Payment Links → Create → Link copy karo → yahan paste karo
+          </div>
           <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
             <Toggle checked={!!form.demoMode} onChange={v => set('demoMode', v)} />
-            <span style={{ fontSize: 14, color: '#374151' }}>Demo Mode (real payment skip hoga, test ke liye)</span>
+            <span style={{ fontSize: 14, color: '#374151' }}>Demo Mode — Test ke liye ON karo (real payment nahi hoga)</span>
           </div>
         </Card>
 
-        <Card title="🔑 Razorpay Keys (Optional — sirf Razorpay checkout ke liye)">
+        <Card title="📧 Email Delivery — Purchase hone par customer ko email">
           <FGrid>
-            <Inp label="Razorpay Key ID" value={form.razorpayKeyId} onChange={v => set('razorpayKeyId', v)} placeholder="rzp_live_xxxxx" />
-            <Inp label="Razorpay Key Secret" value={form.razorpayKeySecret} onChange={v => set('razorpayKeySecret', v)} type="password" placeholder="Secret key" />
-          </FGrid>
-        </Card>
-
-        <Card title="📧 Email Delivery (Gmail)">
-          <FGrid>
-            <Inp label="Gmail Address" value={form.emailFrom} onChange={v => set('emailFrom', v)} type="email" placeholder="yourstore@gmail.com" />
-            <Inp label="Gmail App Password (16-char)" value={form.emailPassword} onChange={v => set('emailPassword', v)} type="password" placeholder="xxxx xxxx xxxx xxxx" />
+            <Inp label="Gmail Address — Jis Gmail se email jayegi" value={form.emailFrom} onChange={v => set('emailFrom', v)} type="email" placeholder="yourstore@gmail.com" />
+            <Inp label="Gmail App Password (16 characters)" value={form.emailPassword} onChange={v => set('emailPassword', v)} type="password" placeholder="xxxx xxxx xxxx xxxx" />
           </FGrid>
           <div style={{ marginTop: 8, fontSize: 12, color: '#94a3b8' }}>
-            Gmail → Settings → Security → 2-Step Verification ON → App Passwords → Generate karo
+            Gmail → myaccount.google.com → Security → 2-Step Verification ON karo → App Passwords → "Mail" select → Generate → 16-char code copy karo
           </div>
         </Card>
 
-        <Card title="🔗 Automation Webhook">
-          <Inp label="Webhook URL (Make / Zapier / Pabbly / n8n)" value={form.automationWebhookUrl} onChange={v => set('automationWebhookUrl', v)} type="url" placeholder="https://hook.make.com/..." />
+        <Card title="🔗 Automation Webhook (Optional — Make/Zapier/Pabbly)">
+          <Inp label="Webhook URL — Purchase hone par yahan data jayega" value={form.automationWebhookUrl} onChange={v => set('automationWebhookUrl', v)} type="url" placeholder="https://hook.make.com/..." />
         </Card>
 
       </div>
@@ -507,6 +515,14 @@ function Media({ settings, onRefresh }) {
         </Card>
 
         <Card title="📂 Category Section — 8 Images ('Har niche ke liye' section mein slider)">
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '10px 14px', marginBottom: 8 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>📐 Image Size Guide</div>
+            <div style={{ fontSize: 12, color: '#475569', lineHeight: 1.7 }}>
+              ✅ <strong>Recommended:</strong> 1080×1080px (square / 1:1 ratio)<br />
+              ✅ <strong>Format:</strong> JPG ya PNG · Max size: 3MB<br />
+              ✅ <strong>Kaise upload karein:</strong> <a href="https://imgbb.com" target="_blank" rel="noreferrer" style={{ color: '#1d4ed8' }}>imgbb.com</a> → Image upload → "Direct link" copy → URL box mein paste → URL Save
+            </div>
+          </div>
           {[
             { n: 1, name: 'Indian Wedding Prompts' },
             { n: 2, name: 'Birthday Celebration' },
@@ -517,7 +533,7 @@ function Media({ settings, onRefresh }) {
             { n: 7, name: 'Jewelry Photoshoot' },
             { n: 8, name: 'Miniature & Viral' },
           ].map(({ n, name }) => (
-            <MediaField key={n} {...mfProps} label={`Cat ${n} — "${name}"`} field={`cat${n}`} accept="image/*" hint="imgbb.com se direct link paste karo · square image best lagti hai" />
+            <MediaField key={n} {...mfProps} label={`Category ${n} — "${name}" card`} field={`cat${n}`} accept="image/*" hint="1080×1080px square · imgbb.com se URL paste karo" />
           ))}
         </Card>
 
