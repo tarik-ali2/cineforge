@@ -394,7 +394,12 @@ function MediaField({ label, field, accept, hint, settings, uploading, onUpload,
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>{label}</div>
           <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{hint}</div>
-          {currentPath && <div style={{ fontSize: 11, color: '#22c55e', marginTop: 3, wordBreak: 'break-all' }}>✓ Saved</div>}
+          {currentPath && (
+            <div style={{ marginTop: 4 }}>
+              <div style={{ fontSize: 11, color: '#22c55e', fontWeight: 700 }}>✓ Saved</div>
+              <div style={{ fontSize: 10, color: '#64748b', wordBreak: 'break-all', marginTop: 2 }}>{currentPath.length > 60 ? currentPath.slice(0, 60) + '...' : currentPath}</div>
+            </div>
+          )}
         </div>
         <label style={{ position: 'relative', padding: '8px 16px', background: '#0f172a', color: '#fff', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
           {uploading[field] ? 'Uploading...' : '⬆ Upload'}

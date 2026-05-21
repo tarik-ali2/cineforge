@@ -22,7 +22,7 @@ function SampleCard({ card, onOpen, onPlayChange }) {
       : {}
 
   const fallbackCss = card.imgPath ? '' : card.css
-  const mediaSizeClass = (ytId || vidFile) ? 'aspect-[9/16]' : 'aspect-square'
+  const mediaSizeClass = (ytId || vidFile) ? 'aspect-[9/16] max-h-[60vh]' : 'aspect-square'
 
   const startPlay = () => { setPlaying(true); onPlayChange(true) }
   const stopPlay  = () => { setPlaying(false); onPlayChange(false) }

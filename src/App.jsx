@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import Toast from './components/Toast'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import SampleSection from './components/SampleSection'
@@ -12,8 +11,6 @@ import FAQ from './components/FAQ'
 import FinalOffer from './components/FinalOffer'
 import Footer from './components/Footer'
 import StickyBar from './components/StickyBar'
-import LeadDialog from './components/LeadDialog'
-import ThankYou from './components/ThankYou'
 import SampleDialog from './components/SampleDialog'
 
 const DEFAULT_CONTENT = {
@@ -62,13 +59,7 @@ const DEFAULT_SETTINGS = { productName: '10 Lakh+ AI Prompt Bundle', price: 199,
 export default function App() {
   const [content,  setContent]  = useState(DEFAULT_CONTENT)
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
-  const [dialogOpen, setDialogOpen]     = useState(false)
-  const [thankYou, setThankYou]         = useState(false)
-  const [customerName, setCustomerName] = useState('friend')
-  const [pdfUrl, setPdfUrl]             = useState('/ai-prompts-pack.pdf')
-  const [sampleOpen, setSampleOpen]     = useState(null)
-  const [toastMsg, setToastMsg]         = useState('')
-  const [toastVisible, setToastVisible] = useState(true)
+  const [sampleOpen, setSampleOpen] = useState(null)
 
   useEffect(() => {
     Promise.all([
@@ -81,23 +72,11 @@ export default function App() {
     })
   }, [])
 
-  useEffect(() => {
-    if (!toastMsg) return
-    const id = setInterval(() => {
-      setToastVisible(false)
-      setTimeout(() => setToastVisible(true), 400)
-    }, 4500)
-    return () => clearInterval(id)
-  }, [toastMsg])
-
-  const openBuy = useCallback(() => setDialogOpen(true), [])
-
-  const handlePurchase = useCallback((name, url) => {
-    setCustomerName(name || 'friend')
-    if (url) setPdfUrl(url)
-    setDialogOpen(false)
-    setThankYou(true)
-  }, [])
+  const openBuy = useCallback(() => {
+    const link = settings.paymentLink
+    if (link) window.open(link, '_blank')
+    else alert('Payment link admin panel → Settings mein set karo')
+  }, [settings.paymentLink])
 
   return (
     <div className="min-h-screen bg-[#070707] text-white" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif' }}>
@@ -118,21 +97,6 @@ export default function App() {
 
       <Footer content={content} />
       <StickyBar onBuy={openBuy} content={content} settings={settings} />
-
-      {dialogOpen && (
-        <LeadDialog
-          onClose={() => setDialogOpen(false)}
-          onPurchase={handlePurchase}
-        />
-      )}
-
-      {thankYou && (
-        <ThankYou
-          name={customerName}
-          pdfUrl={pdfUrl}
-          onBack={() => setThankYou(false)}
-        />
-      )}
 
       {sampleOpen && (
         <SampleDialog
