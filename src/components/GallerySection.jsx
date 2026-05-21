@@ -27,7 +27,7 @@ function GalleryCard({ item, onPlayChange }) {
       : {}
 
   const fallbackCss = item.imgPath ? '' : item.css
-  const aspectClass = (ytId || vidFile) ? 'aspect-[9/16] max-h-[60vh]' : 'aspect-square'
+  const aspectClass = (ytId || vidFile) ? 'aspect-[9/16]' : 'aspect-square'
 
   const startPlay = () => { setPlaying(true); onPlayChange(true) }
   const stopPlay  = () => { setPlaying(false); onPlayChange(false) }
