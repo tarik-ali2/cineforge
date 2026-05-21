@@ -101,6 +101,8 @@ async function clearOrders() {
 // ── Defaults ──────────────────────────────────────────────────────────────────
 
 const DEFAULT_SETTINGS = {
+  adminId: 'admin',
+  adminPassword: 'admin123',
   productName: '10 Lakh+ AI Prompt Bundle',
   price: 199,
   mrp: 4999,
@@ -227,12 +229,30 @@ async function saveFile(file) {
   return `/uploads/${filename}`;
 }
 
+// ── Admin Auth ────────────────────────────────────────────────────────────────
+
+app.post('/api/admin/verify', async (req, res) => {
+  try {
+    const { id, password } = req.body;
+    const s = await getDoc('settings', DEFAULT_SETTINGS);
+    if (id === (s.adminId || 'admin') && password === (s.adminPassword || 'admin123')) {
+      res.json({ ok: true });
+    } else {
+      res.json({ ok: false });
+    }
+  } catch { res.json({ ok: false }); }
+});
+
+app.get('/api/health', (req, res) => {
+  res.json({ mongodb: !!db, mongoUri: MONGO_URI ? 'set' : 'missing' });
+});
+
 // ── Settings ──────────────────────────────────────────────────────────────────
 
 app.get('/api/settings', async (req, res) => {
   try {
     const s = await getDoc('settings', DEFAULT_SETTINGS);
-    const { razorpayKeySecret, emailPassword, ...safe } = s;
+    const { razorpayKeySecret, emailPassword, adminPassword, ...safe } = s;
     res.json({ ...safe, hasRazorpaySecret: !!razorpayKeySecret, hasEmailPassword: !!emailPassword });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });

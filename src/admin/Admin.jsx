@@ -90,14 +90,27 @@ export default function Admin() {
 
 // ── Login ─────────────────────────────────────────────────────────────────────
 function Login({ onLogin }) {
-  const [id, setId]       = useState('')
-  const [pw, setPw]       = useState('')
-  const [err, setErr]     = useState('')
+  const [id, setId]         = useState('')
+  const [pw, setPw]         = useState('')
+  const [err, setErr]       = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const submit = e => {
+  const submit = async e => {
     e.preventDefault()
-    if (id === 'admin' && pw === 'admin123') onLogin()
-    else setErr('Wrong ID or password')
+    setLoading(true)
+    setErr('')
+    try {
+      const res = await fetch('/api/admin/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, password: pw }),
+      }).then(r => r.json())
+      if (res.ok) onLogin()
+      else setErr('Wrong ID or password')
+    } catch {
+      setErr('Server se connect nahi ho pa raha, thoda wait karo')
+    }
+    setLoading(false)
   }
 
   return (
@@ -112,8 +125,8 @@ function Login({ onLogin }) {
           <Inp label="Admin ID"  value={id} onChange={setId} placeholder="admin" />
           <Inp label="Password"  value={pw} onChange={setPw} placeholder="••••••••" type="password" />
           {err && <div style={{ color: '#dc2626', fontSize: 13 }}>{err}</div>}
-          <button type="submit" style={{ padding: '12px 0', background: '#e6382f', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>
-            Login
+          <button type="submit" disabled={loading} style={{ padding: '12px 0', background: loading ? '#94a3b8' : '#e6382f', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: loading ? 'not-allowed' : 'pointer' }}>
+            {loading ? 'Verifying...' : 'Login'}
           </button>
           <div style={{ fontSize: 12, color: '#94a3b8', textAlign: 'center' }}>Default: admin / admin123</div>
         </form>
@@ -192,6 +205,11 @@ function Settings({ settings, onSave }) {
   const [form, setForm] = useState({ ...settings })
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
+  const [health, setHealth] = useState(null)
+
+  useEffect(() => {
+    fetch('/api/health').then(r => r.json()).then(setHealth).catch(() => {})
+  }, [])
 
   const save = async () => {
     setSaving(true)
@@ -211,6 +229,22 @@ function Settings({ settings, onSave }) {
       </div>
     }>
       <div style={{ display: 'grid', gap: 20, maxWidth: 720 }}>
+
+        {/* MongoDB status */}
+        {health && (
+          <div style={{
+            background: health.mongodb ? '#f0fdf4' : '#fef2f2',
+            border: `1px solid ${health.mongodb ? '#86efac' : '#fca5a5'}`,
+            borderRadius: 10, padding: '12px 16px', fontSize: 13,
+            color: health.mongodb ? '#166534' : '#991b1b',
+            display: 'flex', alignItems: 'center', gap: 10
+          }}>
+            <span style={{ fontSize: 18 }}>{health.mongodb ? '✅' : '❌'}</span>
+            {health.mongodb
+              ? 'MongoDB connected — data permanently save hoga, deploy ke baad bhi nahi jayega!'
+              : 'MongoDB connected NAHI hai — deploy karne par data delete ho jayega! MONGO_URI Render pe sahi set karo.'}
+          </div>
+        )}
 
         {/* Quick guide */}
         <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 10, padding: '14px 16px', fontSize: 13, color: '#166534', lineHeight: 1.9 }}>
@@ -255,6 +289,16 @@ function Settings({ settings, onSave }) {
 
         <Card title="🔗 Automation Webhook (Optional — Make/Zapier/Pabbly)">
           <Inp label="Webhook URL — Purchase hone par yahan data jayega" value={form.automationWebhookUrl} onChange={v => set('automationWebhookUrl', v)} type="url" placeholder="https://hook.make.com/..." />
+        </Card>
+
+        <Card title="🔐 Admin Login Credentials Change">
+          <div style={{ background: '#fef9c3', border: '1px solid #fbbf24', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#92400e', marginBottom: 8 }}>
+            ⚠️ Naya ID aur password save karne ke baad wahi use karna hoga login ke liye. Bhool gaye toh server.js mein default 'admin' / 'admin123' restore karna padega.
+          </div>
+          <FGrid>
+            <Inp label="Admin ID (Login username)" value={form.adminId || 'admin'} onChange={v => set('adminId', v)} placeholder="admin" />
+            <Inp label="Admin Password" value={form.adminPassword || ''} onChange={v => set('adminPassword', v)} type="password" placeholder="Naya password dalein" />
+          </FGrid>
         </Card>
 
       </div>
