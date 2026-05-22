@@ -1,11 +1,37 @@
 import { useState, useEffect } from 'react'
 
 // ── API helpers ───────────────────────────────────────────────────────────────
+const getToken = () => localStorage.getItem('admToken') || ''
+const authH = () => ({ Authorization: `Bearer ${getToken()}` })
+const jsonH = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` })
+
+function handleUnauth() {
+  localStorage.removeItem('adm')
+  localStorage.removeItem('admToken')
+  window.location.reload()
+}
+
 const api = {
-  get:    (url)       => fetch(url).then(r => r.json()),
-  post:   (url, data) => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(r => r.json()),
-  del:    (url)       => fetch(url, { method: 'DELETE' }).then(r => r.json()),
-  upload: (form)      => fetch('/api/upload', { method: 'POST', body: form }).then(r => r.json()),
+  get: async (url) => {
+    const r = await fetch(url, { headers: authH() })
+    if (r.status === 401) { handleUnauth(); return {} }
+    return r.json()
+  },
+  post: async (url, data) => {
+    const r = await fetch(url, { method: 'POST', headers: jsonH(), body: JSON.stringify(data) })
+    if (r.status === 401) { handleUnauth(); return {} }
+    return r.json()
+  },
+  del: async (url) => {
+    const r = await fetch(url, { method: 'DELETE', headers: authH() })
+    if (r.status === 401) { handleUnauth(); return {} }
+    return r.json()
+  },
+  upload: async (form) => {
+    const r = await fetch('/api/upload', { method: 'POST', headers: authH(), body: form })
+    if (r.status === 401) { handleUnauth(); return {} }
+    return r.json()
+  },
 }
 
 const NAV = [
@@ -105,8 +131,10 @@ function Login({ onLogin }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, password: pw }),
       }).then(r => r.json())
-      if (res.ok) onLogin()
-      else setErr('Wrong ID or password')
+      if (res.ok) {
+        if (res.token) localStorage.setItem('admToken', res.token)
+        onLogin()
+      } else setErr('Wrong ID or password')
     } catch {
       setErr('Server se connect nahi ho pa raha, thoda wait karo')
     }
@@ -257,6 +285,14 @@ function Settings({ settings, onSave }) {
           <strong>Gmail</strong> → Purchase hone par customer ko confirmation email jayegi<br />
           <strong>Webhook</strong> → Make / Zapier / Pabbly se automation ke liye (optional)
         </div>
+
+        <Card title="📊 Google Tag Manager (GTM)">
+          <Inp label="GTM Container ID — Google Tag Manager ID (format: GTM-XXXXXXX)" value={form.gtmId} onChange={v => set('gtmId', v)} placeholder="GTM-PP97L3Q8" />
+          <div style={{ background: '#f0f9ff', border: '1px solid #93c5fd', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#1e3a5f', lineHeight: 1.8 }}>
+            💡 GTM ID save karo → Save Settings dabao → website refresh karo → tracking shuru ho jayegi<br />
+            GTM se aap control kar sakte ho: <strong>GA4 Analytics, Meta Pixel, Google Ads Remarketing</strong> — sab bina website touch kiye
+          </div>
+        </Card>
 
         <Card title="🛍️ Product — Landing page par dikhne wali details">
           <FGrid>

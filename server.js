@@ -7,6 +7,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { MongoClient } from 'mongodb';
 import { v2 as cloudinary } from 'cloudinary';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,6 +16,54 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
+
+// Trust Render/proxy for correct IP in rate limiter
+app.set('trust proxy', 1);
+
+// ── Security Headers (helmet) ─────────────────────────────────────────────────
+app.use(helmet({
+  contentSecurityPolicy: false,       // disabled — React inline scripts + GTM + YouTube iframes
+  crossOriginEmbedderPolicy: false,   // needed for YouTube embeds
+}));
+
+// ── Rate Limiting ─────────────────────────────────────────────────────────────
+const generalLimit = rateLimit({
+  windowMs: 60 * 1000,   // 1 minute
+  max: 120,              // 120 requests per minute per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Please slow down.' },
+});
+
+const loginLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,  // 15 minutes
+  max: 10,                    // 10 login attempts per 15 min per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many login attempts. Try again after 15 minutes.' },
+});
+
+app.use('/api', generalLimit);
+
+// ── Admin Token Store ─────────────────────────────────────────────────────────
+const adminTokens = new Map(); // token -> expiry timestamp
+
+// Clean up expired tokens every hour
+setInterval(() => {
+  const now = Date.now();
+  for (const [t, exp] of adminTokens) {
+    if (exp < now) adminTokens.delete(t);
+  }
+}, 60 * 60 * 1000);
+
+function requireAdmin(req, res, next) {
+  const auth = req.headers.authorization;
+  const token = auth?.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (!token || !adminTokens.has(token) || adminTokens.get(token) < Date.now()) {
+    return res.status(401).json({ error: 'Unauthorized — please login again' });
+  }
+  next();
+}
 
 // ── Database ─────────────────────────────────────────────────────────────────
 
@@ -107,6 +157,7 @@ async function clearOrders() {
 const DEFAULT_SETTINGS = {
   adminId: 'admin',
   adminPassword: 'admin123',
+  gtmId: '',
   productName: '10 Lakh+ AI Prompt Bundle',
   price: 199,
   mrp: 4999,
@@ -235,12 +286,14 @@ async function saveFile(file) {
 
 // ── Admin Auth ────────────────────────────────────────────────────────────────
 
-app.post('/api/admin/verify', async (req, res) => {
+app.post('/api/admin/verify', loginLimit, async (req, res) => {
   try {
     const { id, password } = req.body;
     const s = await getDoc('settings', DEFAULT_SETTINGS);
     if (id === (s.adminId || 'admin') && password === (s.adminPassword || 'admin123')) {
-      res.json({ ok: true });
+      const token = crypto.randomBytes(32).toString('hex');
+      adminTokens.set(token, Date.now() + 24 * 60 * 60 * 1000); // 24h expiry
+      res.json({ ok: true, token });
     } else {
       res.json({ ok: false });
     }
@@ -261,12 +314,16 @@ app.get('/api/settings', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.get('/api/settings/full', async (req, res) => {
-  try { res.json(await getDoc('settings', DEFAULT_SETTINGS)); }
+app.get('/api/settings/full', requireAdmin, async (req, res) => {
+  try {
+    const s = await getDoc('settings', DEFAULT_SETTINGS);
+    const { adminPassword, ...safe } = s;
+    res.json(safe); // never send adminPassword to client
+  }
   catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/settings', async (req, res) => {
+app.post('/api/settings', requireAdmin, async (req, res) => {
   try {
     const current = await getDoc('settings', DEFAULT_SETTINGS);
     await setDoc('settings', { ...current, ...req.body });
@@ -281,7 +338,7 @@ app.get('/api/content', async (req, res) => {
   catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/content', async (req, res) => {
+app.post('/api/content', requireAdmin, async (req, res) => {
   try {
     const current = await getDoc('content', DEFAULT_CONTENT);
     await setDoc('content', { ...current, ...req.body });
@@ -291,7 +348,7 @@ app.post('/api/content', async (req, res) => {
 
 // ── Upload ────────────────────────────────────────────────────────────────────
 
-app.post('/api/upload', upload.fields([
+app.post('/api/upload', requireAdmin, upload.fields([
   { name: 'pdf', maxCount: 1 },
   { name: 'heroImage', maxCount: 1 },
   { name: 'sampleImage', maxCount: 1 },
@@ -327,7 +384,7 @@ app.post('/api/upload', upload.fields([
 
 // ── Orders ────────────────────────────────────────────────────────────────────
 
-app.get('/api/orders', async (req, res) => {
+app.get('/api/orders', requireAdmin, async (req, res) => {
   try { res.json(await getOrders()); }
   catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -340,7 +397,7 @@ app.post('/api/orders', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.delete('/api/orders', async (req, res) => {
+app.delete('/api/orders', requireAdmin, async (req, res) => {
   try { await clearOrders(); res.json({ ok: true }); }
   catch (err) { res.status(500).json({ error: err.message }); }
 });
