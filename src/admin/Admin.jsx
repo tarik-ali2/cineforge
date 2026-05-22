@@ -399,6 +399,12 @@ function Content({ content, onSave }) {
             <F label="Gallery Kicker" name="galleryKicker" />
             <F label="Gallery Heading" name="galleryHeading" />
           </FGrid>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 4 }}>Gallery Card Titles (niche dikhne wale naam)</div>
+          <FGrid>
+            <F label="Gallery Card 1 Title — Image Creation" name="gallery1Title" />
+            <F label="Gallery Card 3 Title — Business Ad" name="gallery3Title" />
+            <F label="Gallery Card 4 Title — Festival & Event" name="gallery4Title" />
+          </FGrid>
           <FGrid>
             <F label="Category Kicker" name="categoryKicker" />
             <F label="Category Heading" name="categoryHeading" />

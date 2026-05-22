@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 
 const FALLBACK = [
-  { id: 1, css: 'g-one',   title: 'Image Creation Prompts',   settingsKey: 'gallery1Path' },
-  { id: 3, css: 'g-three', title: 'Business Ad Prompts',      settingsKey: 'gallery3Path' },
-  { id: 4, css: 'g-four',  title: 'Festival & Event Prompts', settingsKey: 'gallery4Path' },
+  { id: 1, css: 'g-one',   defaultTitle: 'Image Creation Prompts',   settingsKey: 'gallery1Path', contentKey: 'gallery1Title' },
+  { id: 3, css: 'g-three', defaultTitle: 'Business Ad Prompts',      settingsKey: 'gallery3Path', contentKey: 'gallery3Title' },
+  { id: 4, css: 'g-four',  defaultTitle: 'Festival & Event Prompts', settingsKey: 'gallery4Path', contentKey: 'gallery4Title' },
 ]
 
 function getYouTubeId(url) {
@@ -85,6 +85,7 @@ export default function GallerySection({ content = {}, settings = {} }) {
   const items = FALLBACK.map(f => ({
     ...f,
     imgPath: settings[f.settingsKey] || '',
+    title: content[f.contentKey] || f.defaultTitle,
   }))
 
   const goTo = useCallback((idx) => {
