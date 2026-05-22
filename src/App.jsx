@@ -72,8 +72,10 @@ export default function App() {
 
   const openBuy = useCallback(() => {
     const link = settings.paymentLink
-    if (link) window.open(link, '_blank')
-    else alert('Payment link admin panel → Settings mein set karo')
+    if (link) {
+      if (window.fbq) window.fbq('track', 'InitiateCheckout')
+      window.open(link, '_blank')
+    } else alert('Payment link admin panel → Settings mein set karo')
   }, [settings.paymentLink])
 
   return (
