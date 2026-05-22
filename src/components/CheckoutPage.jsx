@@ -42,7 +42,7 @@ export default function CheckoutPage({ onClose, settings = {} }) {
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#aaa', fontSize: 22, cursor: 'pointer' }}>✕</button>
         </div>
 
-        <div style={{ background: '#f5f5f5', padding: 16, display: 'grid', gap: 12, borderRadius: '0 0 12px 12px' }}>
+        <div style={{ background: '#f5f5f5', padding: 16, display: 'grid', gap: 12, borderRadius: '0 0 12px 12px', color: '#1a1a1a' }}>
 
           {/* Box 1 — Main Product (always checked) */}
           <BumpBox
@@ -131,32 +131,32 @@ export default function CheckoutPage({ onClose, settings = {} }) {
 
 function BumpBox({ color, border, checked, disabled, onChange, alertText, items, desc }) {
   return (
-    <div style={{ background: color, border: `2px solid ${border}`, borderRadius: 10, padding: 14 }}>
+    <div style={{ background: color, border: `2px solid ${border}`, borderRadius: 10, padding: 14, color: '#1a1a1a' }}>
       <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: disabled ? 'default' : 'pointer' }}>
         <input
           type="checkbox" checked={checked} disabled={disabled}
           onChange={e => onChange && onChange(e.target.checked)}
           style={{ width: 18, height: 18, marginTop: 2, accentColor: border, flexShrink: 0, cursor: disabled ? 'default' : 'pointer' }}
         />
-        <div>
-          <div style={{ background: '#ffff00', color: '#000', fontWeight: 800, fontSize: 15, display: 'inline-block', padding: '1px 6px', borderRadius: 3, marginBottom: 6 }}>
+        <div style={{ color: '#1a1a1a' }}>
+          <div style={{ background: '#ffff00', color: '#000', fontWeight: 900, fontSize: 15, display: 'inline-block', padding: '2px 8px', borderRadius: 3, marginBottom: 8 }}>
             Yes! I Want this!
           </div>
-          <div style={{ fontSize: 13, marginBottom: 6 }}>
-            <strong>LAST CHANCE ALERT:-</strong>{' '}
-            <span style={{ color: '#e53935', fontWeight: 700 }}>{alertText}</span>
+          <div style={{ fontSize: 14, marginBottom: 6, color: '#1a1a1a', fontWeight: 700 }}>
+            LAST CHANCE ALERT:-{' '}
+            <span style={{ color: '#e53935', fontWeight: 800 }}>{alertText}</span>
           </div>
           {items.length > 0 && (
-            <div style={{ fontSize: 13 }}>
-              <strong>LIMITED OFFER:</strong>
-              <ul style={{ margin: '4px 0 0 0', paddingLeft: 18, lineHeight: 1.8 }}>
+            <div style={{ fontSize: 13, color: '#1a1a1a' }}>
+              <strong style={{ color: '#1a1a1a' }}>LIMITED OFFER:</strong>
+              <ul style={{ margin: '4px 0 0 0', paddingLeft: 18, lineHeight: 1.9, color: '#1a1a1a', fontWeight: 600 }}>
                 {items.map((item, i) => <li key={i}>{item}</li>)}
               </ul>
             </div>
           )}
           {desc && (
-            <div style={{ fontSize: 13 }}>
-              <strong>LIMITED OFFER:</strong> "{desc}"
+            <div style={{ fontSize: 13, color: '#1a1a1a', fontWeight: 600 }}>
+              <strong style={{ color: '#1a1a1a' }}>LIMITED OFFER:</strong> "{desc}"
             </div>
           )}
         </div>

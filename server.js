@@ -526,6 +526,10 @@ async function serveApp(req, res) {
       html = html.replace('</head>', `${gtmHead}</head>`);
       html = html.replace('<body>', `<body>${gtmBody}`);
     }
+    // Checkout page — noindex (don't show in Google)
+    if (req.path === '/checkout') {
+      html = html.replace('<meta name="robots" content="index, follow" />', '<meta name="robots" content="noindex, nofollow" />');
+    }
   } catch { /* serve html as-is if db error */ }
 
   res.send(html);

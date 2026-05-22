@@ -62,6 +62,17 @@ export default function App() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
   const [sampleOpen, setSampleOpen] = useState(null)
   const [checkoutOpen, setCheckoutOpen] = useState(false)
+
+  const openCheckout = useCallback(() => {
+    setCheckoutOpen(true)
+    window.history.pushState({}, '', '/checkout')
+    if (window.dataLayer) window.dataLayer.push({ event: 'virtualPageview', page_path: '/checkout', page_title: 'Checkout' })
+  }, [])
+
+  const closeCheckout = useCallback(() => {
+    setCheckoutOpen(false)
+    window.history.pushState({}, '', '/')
+  }, [])
   useEffect(() => {
     Promise.all([
       fetch('/api/content').then(r => r.json()).catch(() => ({})),
@@ -73,8 +84,8 @@ export default function App() {
   }, [])
 
   const openBuy = useCallback(() => {
-    setCheckoutOpen(true)
-  }, [])
+    openCheckout()
+  }, [openCheckout])
 
   return (
     <div className="min-h-screen bg-[#070707] text-white" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif' }}>
@@ -97,7 +108,7 @@ export default function App() {
       <StickyBar onBuy={openBuy} content={content} settings={settings} />
 
       {checkoutOpen && (
-        <CheckoutPage settings={settings} onClose={() => setCheckoutOpen(false)} />
+        <CheckoutPage settings={settings} onClose={closeCheckout} />
       )}
 
       {sampleOpen && (
