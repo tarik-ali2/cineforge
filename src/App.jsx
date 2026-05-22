@@ -12,6 +12,7 @@ import FinalOffer from './components/FinalOffer'
 import Footer from './components/Footer'
 import StickyBar from './components/StickyBar'
 import SampleDialog from './components/SampleDialog'
+import CheckoutPage from './components/CheckoutPage'
 
 const DEFAULT_CONTENT = {
   brandName: 'Market Prompt Hub',
@@ -60,6 +61,7 @@ export default function App() {
   const [content,  setContent]  = useState(DEFAULT_CONTENT)
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
   const [sampleOpen, setSampleOpen] = useState(null)
+  const [checkoutOpen, setCheckoutOpen] = useState(false)
   useEffect(() => {
     Promise.all([
       fetch('/api/content').then(r => r.json()).catch(() => ({})),
@@ -71,12 +73,8 @@ export default function App() {
   }, [])
 
   const openBuy = useCallback(() => {
-    const link = settings.paymentLink
-    if (link) {
-      if (window.fbq) window.fbq('track', 'InitiateCheckout')
-      window.open(link, '_blank')
-    } else alert('Payment link admin panel → Settings mein set karo')
-  }, [settings.paymentLink])
+    setCheckoutOpen(true)
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#070707] text-white" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif' }}>
@@ -97,6 +95,10 @@ export default function App() {
 
       <Footer content={content} />
       <StickyBar onBuy={openBuy} content={content} settings={settings} />
+
+      {checkoutOpen && (
+        <CheckoutPage settings={settings} onClose={() => setCheckoutOpen(false)} />
+      )}
 
       {sampleOpen && (
         <SampleDialog

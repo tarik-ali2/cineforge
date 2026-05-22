@@ -327,6 +327,31 @@ function Settings({ settings, onSave }) {
           <Inp label="Webhook URL — Purchase hone par yahan data jayega" value={form.automationWebhookUrl} onChange={v => set('automationWebhookUrl', v)} type="url" placeholder="https://hook.make.com/..." />
         </Card>
 
+        <Card title="🛒 Checkout Page — Order Bumps (Upsell)">
+          <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#166534', marginBottom: 4 }}>
+            💡 Buy button click hone par checkout page khulega jisme 3 boxes honge. Har combination ke liye alag payment link set karo.
+          </div>
+          <Inp label="Main Product Items (comma separated — green box mein dikhenge)" value={form.mainItems} onChange={v => set('mainItems', v)} placeholder="Course 1,Course 2,Item 3" />
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginTop: 8, marginBottom: 4 }}>📦 Order Bump 1 (Blue Box)</div>
+          <FGrid>
+            <Inp label="Bump 1 Title" value={form.bump1Title} onChange={v => set('bump1Title', v)} placeholder="100,000 ChatGPT Prompts Bundle" />
+            <Inp label="Bump 1 Price ₹" value={form.bump1Price} onChange={v => set('bump1Price', v)} type="number" placeholder="149" />
+          </FGrid>
+          <Inp label="Bump 1 Description (agar items nahi hain toh)" value={form.bump1Desc} onChange={v => set('bump1Desc', v)} placeholder="Short description..." />
+          <Inp label="Bump 1 Items (optional, comma separated)" value={form.bump1Items} onChange={v => set('bump1Items', v)} placeholder="Item 1,Item 2,Item 3" />
+          <Inp label="Payment Link — Main Only (₹199)" value={form.paymentLink} onChange={v => set('paymentLink', v)} type="url" placeholder="https://rzp.io/l/..." />
+          <Inp label="Payment Link — Main + Bump1 (₹348)" value={form.paymentLinkBump1} onChange={v => set('paymentLinkBump1', v)} type="url" placeholder="https://rzp.io/l/..." />
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginTop: 8, marginBottom: 4 }}>📦 Order Bump 2 (Yellow Box)</div>
+          <FGrid>
+            <Inp label="Bump 2 Title" value={form.bump2Title} onChange={v => set('bump2Title', v)} placeholder="AI and Machine Learning Course" />
+            <Inp label="Bump 2 Price ₹" value={form.bump2Price} onChange={v => set('bump2Price', v)} type="number" placeholder="147" />
+          </FGrid>
+          <Inp label="Bump 2 Description" value={form.bump2Desc} onChange={v => set('bump2Desc', v)} placeholder="Short description..." />
+          <Inp label="Bump 2 Items (optional, comma separated)" value={form.bump2Items} onChange={v => set('bump2Items', v)} placeholder="Item 1,Item 2,Item 3" />
+          <Inp label="Payment Link — Main + Bump2 (₹346)" value={form.paymentLinkBump2} onChange={v => set('paymentLinkBump2', v)} type="url" placeholder="https://rzp.io/l/..." />
+          <Inp label="Payment Link — Main + Bump1 + Bump2 (₹495)" value={form.paymentLinkBoth} onChange={v => set('paymentLinkBoth', v)} type="url" placeholder="https://rzp.io/l/..." />
+        </Card>
+
         <Card title="🔐 Admin Login Credentials Change">
           <div style={{ background: '#fef9c3', border: '1px solid #fbbf24', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#92400e', marginBottom: 8 }}>
             ⚠️ Naya ID aur password save karne ke baad wahi use karna hoga login ke liye. Bhool gaye toh server.js mein default 'admin' / 'admin123' restore karna padega.

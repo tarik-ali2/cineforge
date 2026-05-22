@@ -186,6 +186,20 @@ const DEFAULT_SETTINGS = {
   cat6Path: '', cat6Name: '',
   cat7Path: '', cat7Name: '',
   cat8Path: '', cat8Name: '',
+  mainItems: 'ChatGPT Mastery Course (62 Videos),Prompt Engineering Course (33 Videos),SaaS ChatGPT Course (33 Videos),ChatGPT Power Course (25 Videos),2500 Digital Product Ideas,365+ Automation Templates,1500+ AI Tools',
+  bump1Enabled: true,
+  bump1Title: '100,000 ChatGPT Prompts Bundle',
+  bump1Desc: 'Smart Work Starts Here – Get 100,000+ ChatGPT Prompts for Hustlers Like You!',
+  bump1Price: 149,
+  bump1Items: '',
+  bump2Enabled: true,
+  bump2Title: 'AI and Machine Learning Course',
+  bump2Desc: 'Start building real-world AI and Machine Learning skills with step-by-step guidance, beginner-friendly explanations, practical projects, and hands-on experiences!',
+  bump2Price: 147,
+  bump2Items: '',
+  paymentLinkBump1: '',
+  paymentLinkBump2: '',
+  paymentLinkBoth: '',
 };
 
 const DEFAULT_CONTENT = {
