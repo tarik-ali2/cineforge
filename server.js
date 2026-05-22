@@ -234,8 +234,8 @@ const DEFAULT_CONTENT = {
 app.use(express.json());
 app.use('/api', (req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
 
-// Serve built React app
-app.use(express.static(path.join(__dirname, 'dist')));
+// Serve static assets (JS, CSS, images) — but NOT index.html (we inject GTM server-side)
+app.use(express.static(path.join(__dirname, 'dist'), { index: false }));
 // Serve root-level files: admin.html, admin.js, styles.css, assets/
 app.use(express.static(path.join(__dirname), { index: false, dotfiles: 'ignore' }));
 // Uploads
@@ -497,17 +497,29 @@ async function sendEmail(s, lead, paymentId, pdfUrl, pdfFilePath, pdfFileName) {
   });
 }
 
-// ── SPA Fallback ──────────────────────────────────────────────────────────────
+// ── SPA Fallback with server-side GTM injection ───────────────────────────────
 
-// /admin/* → React app (Admin component handles routing client-side)
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')));
-app.get('/admin/*', (req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')));
-// Catch-all for React landing page
-app.get('*', (req, res) => {
+async function serveApp(req, res) {
   const filePath = path.join(__dirname, 'dist', 'index.html');
-  if (fs.existsSync(filePath)) res.sendFile(filePath);
-  else res.status(404).send('Build not found. Run: npm run build');
-});
+  if (!fs.existsSync(filePath)) return res.status(404).send('Build not found. Run: npm run build');
+
+  let html = fs.readFileSync(filePath, 'utf8');
+  try {
+    const s = await getDoc('settings', DEFAULT_SETTINGS);
+    if (s.gtmId) {
+      const gtmHead = `<!-- Google Tag Manager --><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${s.gtmId}');</script><!-- End Google Tag Manager -->`;
+      const gtmBody = `<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${s.gtmId}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->`;
+      html = html.replace('</head>', `${gtmHead}</head>`);
+      html = html.replace('<body>', `<body>${gtmBody}`);
+    }
+  } catch { /* serve html as-is if db error */ }
+
+  res.send(html);
+}
+
+app.get('/admin', serveApp);
+app.get('/admin/*', serveApp);
+app.get('*', serveApp);
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import SampleSection from './components/SampleSection'
@@ -60,8 +60,6 @@ export default function App() {
   const [content,  setContent]  = useState(DEFAULT_CONTENT)
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
   const [sampleOpen, setSampleOpen] = useState(null)
-  const gtmInjected = useRef(false)
-
   useEffect(() => {
     Promise.all([
       fetch('/api/content').then(r => r.json()).catch(() => ({})),
@@ -71,26 +69,6 @@ export default function App() {
       setSettings(prev => ({ ...prev, ...s }))
     })
   }, [])
-
-  // Inject GTM dynamically when settings load
-  useEffect(() => {
-    if (!settings.gtmId || gtmInjected.current) return
-    gtmInjected.current = true
-    const script = document.createElement('script')
-    script.innerHTML = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','${settings.gtmId}');`
-    document.head.appendChild(script)
-    const ns = document.createElement('noscript')
-    const iframe = document.createElement('iframe')
-    iframe.src = `https://www.googletagmanager.com/ns.html?id=${settings.gtmId}`
-    iframe.height = '0'; iframe.width = '0'
-    iframe.style.cssText = 'display:none;visibility:hidden'
-    ns.appendChild(iframe)
-    document.body.insertBefore(ns, document.body.firstChild)
-  }, [settings.gtmId])
 
   const openBuy = useCallback(() => {
     const link = settings.paymentLink
