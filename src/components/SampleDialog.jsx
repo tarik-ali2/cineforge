@@ -47,9 +47,10 @@ export default function SampleDialog({ sample, onClose, onBuy }) {
         <div className={`media-screen min-h-[240px] ${sample.imgPath ? '' : bgClass} rounded-2xl overflow-hidden`}>
           {ytId && (
             <iframe
-              src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`}
+              src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&origin=${encodeURIComponent(window.location.origin)}`}
               className="absolute inset-0 w-full h-full border-0"
-              allow="autoplay; encrypted-media"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
             />
           )}

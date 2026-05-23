@@ -24,6 +24,7 @@ app.set('trust proxy', 1);
 app.use(helmet({
   contentSecurityPolicy: false,       // disabled — React inline scripts + GTM + YouTube iframes
   crossOriginEmbedderPolicy: false,   // needed for YouTube embeds
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 }));
 
 // ── Rate Limiting ─────────────────────────────────────────────────────────────
