@@ -32,10 +32,9 @@ function GalleryCard({ item, onPlayChange }) {
   const ytId    = getYouTubeId(item.imgPath)
   const vidFile = !ytId && isVideoFile(item.imgPath)
   const isImage = item.imgPath && !ytId && !vidFile
+  const ytThumb = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : ''
 
-  const thumbStyle = ytId
-    ? { backgroundImage: `url(https://img.youtube.com/vi/${ytId}/hqdefault.jpg)`, backgroundSize: 'cover', backgroundPosition: 'center' }
-    : isImage
+  const thumbStyle = isImage
       ? { backgroundImage: `url(${item.imgPath})`, backgroundSize: 'cover', backgroundPosition: 'center' }
       : {}
 
@@ -51,6 +50,25 @@ function GalleryCard({ item, onPlayChange }) {
         className={`media-screen ${aspectClass} ${fallbackCss}`}
         style={!playing ? thumbStyle : {}}
       >
+        {!playing && ytId && (
+          <img
+            src={ytThumb}
+            alt={item.title}
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          />
+        )}
+        {!playing && vidFile && (
+          <video
+            src={item.imgPath}
+            className="absolute inset-0 w-full h-full object-cover"
+            muted
+            loop
+            autoPlay
+            playsInline
+            preload="metadata"
+          />
+        )}
         {playing && ytId && (
           <iframe
             src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`}
@@ -59,7 +77,7 @@ function GalleryCard({ item, onPlayChange }) {
           />
         )}
         {playing && vidFile && (
-          <video src={item.imgPath} autoPlay controls
+          <video src={item.imgPath} autoPlay controls playsInline
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 5 }} />
         )}
 
