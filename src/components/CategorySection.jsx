@@ -1,12 +1,12 @@
 const CATS = [
-  { css: 'wedding-art',  badge: 'Most Popular', title: 'Indian Wedding Prompts' },
-  { css: 'birthday-art', badge: 'Trending',     title: 'Birthday Celebration' },
-  { css: 'brand-art',    badge: 'Business',     title: 'Brand Campaign' },
-  { css: 'divine-art',   badge: 'Devotional',   title: 'Divine Cinematic' },
-  { css: 'fashion-art',  badge: 'Fashion',      title: 'Fashion & E-commerce' },
-  { css: 'interior-art', badge: 'Premium',      title: 'Interior & Real Estate' },
-  { css: 'jewelry-art',  badge: 'Luxury',       title: 'Jewelry Photoshoot' },
-  { css: 'mini-art',     badge: 'Creative',     title: 'Miniature & Viral' },
+  { css: 'wedding-art',  badge: 'Most Popular', title: 'Indian Wedding Prompts', key: 'cat1' },
+  { css: 'birthday-art', badge: 'Trending',     title: 'Birthday Celebration',   key: 'cat2' },
+  { css: 'brand-art',    badge: 'Business',     title: 'Brand Campaign',         key: 'cat3' },
+  { css: 'divine-art',   badge: 'Devotional',   title: 'Divine Cinematic',        key: 'cat4' },
+  { css: 'fashion-art',  badge: 'Fashion',      title: 'Fashion & E-commerce',    key: 'cat5' },
+  { css: 'interior-art', badge: 'Premium',      title: 'Interior & Real Estate',  key: 'cat6' },
+  { css: 'jewelry-art',  badge: 'Luxury',       title: 'Jewelry Photoshoot',      key: 'cat7' },
+  { css: 'mini-art',     badge: 'Creative',     title: 'Miniature & Viral',       key: 'cat8' },
 ]
 
 export default function CategorySection({ content = {}, settings = {} }) {
@@ -25,8 +25,10 @@ export default function CategorySection({ content = {}, settings = {} }) {
       <div className="slider-track">
         {CATS.map((cat, i) => {
           const imgPath = settings[`cat${i + 1}Path`] || ''
+          const badge = content[`${cat.key}Badge`] || cat.badge
+          const title = content[`${cat.key}Title`] || cat.title
           return (
-            <div key={cat.title} className="w-[62vw] sm:w-[264px] lg:w-[288px]">
+            <div key={cat.key} className="w-[62vw] sm:w-[264px] lg:w-[288px]">
               <div className="border border-white/12 rounded-[14px] bg-[#121212] overflow-hidden">
                 {/* Square image */}
                 <div
@@ -35,9 +37,9 @@ export default function CategorySection({ content = {}, settings = {} }) {
                 />
                 <div className="px-3 py-2">
                   <span className="inline-flex items-center min-h-[22px] px-2 rounded-full bg-white text-black text-[10px] font-black uppercase mb-1">
-                    {cat.badge}
+                    {badge}
                   </span>
-                  <p className="text-white font-black text-sm leading-tight">{cat.title}</p>
+                  <p className="text-white font-black text-sm leading-tight">{title}</p>
                 </div>
               </div>
             </div>

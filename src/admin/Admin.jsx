@@ -463,6 +463,7 @@ function Content({ content, onSave }) {
           <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 4 }}>Gallery Card Titles (niche dikhne wale naam)</div>
           <FGrid>
             <F label="Gallery Card 1 Title — Image Creation" name="gallery1Title" />
+            <F label="Gallery Card 2 Title — Reels/Shorts" name="gallery2Title" />
             <F label="Gallery Card 3 Title — Business Ad" name="gallery3Title" />
             <F label="Gallery Card 4 Title — Festival & Event" name="gallery4Title" />
           </FGrid>
@@ -470,6 +471,15 @@ function Content({ content, onSave }) {
             <F label="Category Kicker" name="categoryKicker" />
             <F label="Category Heading" name="categoryHeading" />
           </FGrid>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 4 }}>Category Card Badge + Name</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+            {[1,2,3,4,5,6,7,8].map(n => (
+              <div key={n} style={{ display: 'grid', gap: 10, padding: 12, border: '1px solid #e2e8f0', borderRadius: 10 }}>
+                <F label={`Category ${n} Badge`} name={`cat${n}Badge`} />
+                <F label={`Category ${n} Card Name`} name={`cat${n}Title`} />
+              </div>
+            ))}
+          </div>
         </Card>
 
         <Card title="📋 Other Sections">
