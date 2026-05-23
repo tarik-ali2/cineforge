@@ -20,7 +20,7 @@ const isVideoFile = src =>
   /\/video\/upload\//i.test(src || '')
 
 export default function SampleDialog({ sample, onClose, onBuy }) {
-  const bgClass = { image: 'image-sample', reel: 'reel-sample', product: 'prod-sample' }[sample.id] || 'image-sample'
+  const bgClass = { image: 'image-sample', reel: 'reel-sample', product: 'prod-sample', extra: 'reel-sample' }[sample.id] || 'image-sample'
   const ytId = getYouTubeId(sample.imgPath)
   const videoFile = !ytId && isVideoFile(sample.imgPath)
   const imageFile = sample.imgPath && !ytId && !videoFile

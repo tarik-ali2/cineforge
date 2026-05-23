@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 
 const FALLBACK = [
   { id: 1, css: 'g-one',   defaultTitle: 'Image Creation Prompts',   settingsKey: 'gallery1Path', contentKey: 'gallery1Title' },
+  { id: 2, css: 'g-two',   defaultTitle: 'Reels & Shorts Prompts',   settingsKey: 'gallery2Path', contentKey: 'gallery2Title' },
   { id: 3, css: 'g-three', defaultTitle: 'Business Ad Prompts',      settingsKey: 'gallery3Path', contentKey: 'gallery3Title' },
   { id: 4, css: 'g-four',  defaultTitle: 'Festival & Event Prompts', settingsKey: 'gallery4Path', contentKey: 'gallery4Title' },
 ]

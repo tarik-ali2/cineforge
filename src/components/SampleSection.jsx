@@ -122,6 +122,7 @@ export default function SampleSection({ onBuy, onOpenSample, content = {}, setti
     { id: 'image',   css: 'image-sample', imgPath: settings.sampleImagePath   || '', title: content.sample1Title || 'Viral Image Prompt',   desc: content.sample1Text || 'Hyper-realistic cinematic AI image prompt for social media posts.',     prompt: content.sample1Prompt || '' },
     { id: 'reel',    css: 'reel-sample',  imgPath: settings.sampleReelPath    || '', title: content.sample2Title || 'Reels & Shorts Prompt', desc: content.sample2Text || 'Fast video concept, hook, camera movement aur caption prompt sample.', prompt: content.sample2Prompt || '' },
     { id: 'product', css: 'prod-sample',  imgPath: settings.sampleProductPath || '', title: content.sample3Title || 'Product Ad Prompt',     desc: content.sample3Text || 'Brand product mockup, lighting, scene and ad copy prompt sample.',    prompt: content.sample3Prompt || '' },
+    { id: 'extra',   css: 'reel-sample',  imgPath: settings.sampleExtraPath   || '', title: content.sample4Title || 'Digital Product Prompt', desc: content.sample4Text || 'Prompt sample for digital product, ad creative aur viral content ideas.', prompt: content.sample4Prompt || '' },
   ]
 
   const goTo = useCallback((idx) => {
@@ -162,7 +163,7 @@ export default function SampleSection({ onBuy, onOpenSample, content = {}, setti
         {content.sampleKicker || 'Free Preview'}
       </span>
       <h2 className="text-white font-black mb-3" style={{ fontSize: 'clamp(26px, 5vw, 68px)' }}>
-        {content.sampleHeading || '3 sample prompts play karke dekho'}
+        {content.sampleHeading || '4 sample prompts play karke dekho'}
       </h2>
       <p className="text-white/72 text-base sm:text-lg leading-relaxed max-w-[760px] mx-auto mb-8 sm:mb-10">
         {content.sampleIntro || 'Buyer ko landing page par hi idea mil jayega ki PDF bundle me kis type ke ready prompts milne wale hain.'}

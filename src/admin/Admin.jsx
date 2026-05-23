@@ -444,8 +444,8 @@ function Content({ content, onSave }) {
             <F label="Section Heading" name="sampleHeading" />
           </FGrid>
           <F label="Section Intro" name="sampleIntro" big />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-            {[1,2,3].map(n => (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 16 }}>
+            {[1,2,3,4].map(n => (
               <div key={n} style={{ display: 'grid', gap: 10 }}>
                 <F label={`Sample ${n} Title`} name={`sample${n}Title`} />
                 <F label={`Sample ${n} Text`} name={`sample${n}Text`} />
@@ -616,21 +616,22 @@ function Media({ settings, onRefresh }) {
           <MediaField {...mfProps} label="Hero Banner Image — Landing page ke top par dikhti hai" field="heroImage" accept="image/*" hint="imgbb.com se URL paste karo · 1280×720px recommended" />
         </Card>
 
-        <Card title="🎬 Free Preview — 3 Sample Cards (landing page par 'Free Preview' section)">
+        <Card title="🎬 Free Preview — 4 Sample Cards (landing page par 'Free Preview' section)">
           <div style={{ background: '#fef9c3', border: '1px solid #fbbf24', borderRadius: 8, padding: '10px 14px', marginBottom: 8, fontSize: 13, color: '#92400e' }}>
             💡 <strong>Tip:</strong> YouTube URL paste karo → URL Save → landing page refresh karo → card pe ▶ click karo
           </div>
           <MediaField {...mfProps} label="Card 1 — 'Viral Image Prompt' (left card)" field="sampleImage" accept="image/*,video/*" hint="imgbb.com image URL ya YouTube URL" />
           <MediaField {...mfProps} label="Card 2 — 'Reels & Shorts Prompt' (middle card)" field="sampleReel" accept="video/*" hint="YouTube video URL paste karo (watch?v= ya /shorts/ dono kaam karenge)" />
-          <MediaField {...mfProps} label="Card 3 — 'Product Ad Prompt' (right card)" field="sampleProduct" accept="image/*,video/*" hint="imgbb.com image URL ya YouTube URL" />
+          <MediaField {...mfProps} label="Card 3 — 'Product Ad Prompt'" field="sampleProduct" accept="image/*,video/*" hint="imgbb.com image URL ya YouTube URL" />
+          <MediaField {...mfProps} label="Card 4 — 'Digital Product Prompt' (new card)" field="sampleExtra" accept="image/*,video/*" hint="imgbb.com image URL ya YouTube URL" />
         </Card>
 
-        <Card title="🖼️ Bundle Preview — 3 Gallery Cards ('Bundle Preview' section mein slider)">
+        <Card title="🖼️ Bundle Preview — 4 Gallery Cards ('Bundle Preview' section mein slider)">
           <div style={{ background: '#f0f9ff', border: '1px solid #93c5fd', borderRadius: 8, padding: '10px 14px', marginBottom: 8, fontSize: 13, color: '#1e3a5f' }}>
-            ℹ️ Gallery mein sirf <strong>Card 1, Card 3, Card 4</strong> use hote hain. Card 2 skip hota hai.
+            ℹ️ Gallery mein ab <strong>Card 1, Card 2, Card 3, Card 4</strong> sab slider mein show honge.
           </div>
           <MediaField {...mfProps} label="Gallery Card 1 — 'Image Creation Prompts'" field="gallery1" accept="image/*,video/*" hint="imgbb.com image URL ya YouTube URL" />
-          <MediaField {...mfProps} label="Gallery Card 2 — (Is waqt use nahi ho raha)" field="gallery2" accept="image/*,video/*" hint="Abhi landing page par nahi dikhega" />
+          <MediaField {...mfProps} label="Gallery Card 2 — 'Reels & Shorts Prompts'" field="gallery2" accept="image/*,video/*" hint="imgbb.com image URL ya YouTube URL" />
           <MediaField {...mfProps} label="Gallery Card 3 — 'Business Ad Prompts'" field="gallery3" accept="image/*,video/*" hint="imgbb.com image URL ya YouTube URL" />
           <MediaField {...mfProps} label="Gallery Card 4 — 'Festival & Event Prompts'" field="gallery4" accept="image/*,video/*" hint="imgbb.com image URL ya YouTube URL" />
         </Card>
