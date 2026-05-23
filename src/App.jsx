@@ -55,7 +55,32 @@ const DEFAULT_CONTENT = {
   footerCopyright: `Copyright © ${new Date().getFullYear()} Market Prompt Hub`,
 }
 
-const DEFAULT_SETTINGS = { productName: '10 Lakh+ AI Prompt Bundle', price: 199, mrp: 4999, slots: 37, pdfUrl: '/ai-prompts-pack.pdf' }
+const DEFAULT_SETTINGS = {
+  productName: '10 Lakh+ AI Prompt Bundle',
+  price: 199,
+  mrp: 4999,
+  slots: 37,
+  pdfUrl: '/ai-prompts-pack.pdf',
+  heroImagePath: '/assets/digital_products.png',
+  sampleImagePath: '/uploads/sampleImage-1778785743627.jpeg',
+  sampleReelPath: '/uploads/sampleReel-1778785743651.mp4',
+  sampleProductPath: '/uploads/sampleProduct-1778785743691.jpeg',
+  gallery1Path: '/uploads/gallery1-1778785743699.jpeg',
+  gallery2Path: '/uploads/gallery2-1778786612351.mp4',
+  gallery3Path: '/uploads/gallery3-1778786612382.mp4',
+  gallery4Path: '/uploads/gallery4-1778786612493.mp4',
+  cat1Path: '/uploads/cat1-1778786612513.jpeg',
+  cat2Path: '/uploads/cat2-1778786612520.jpeg',
+  cat3Path: '/uploads/cat3-1778786612526.jpeg',
+  cat4Path: '/uploads/cat4-1778786612532.jpeg',
+  cat5Path: '/uploads/cat5-1778786612545.jpeg',
+  cat6Path: '/uploads/cat6-1778786612553.jpeg',
+  cat7Path: '/uploads/cat7-1778786612561.jpeg',
+  cat8Path: '/uploads/cat8-1778786612565.jpeg',
+}
+
+const removeEmptyValues = (data = {}) =>
+  Object.fromEntries(Object.entries(data).filter(([, value]) => value !== '' && value !== null && value !== undefined))
 
 export default function App() {
   const [content,  setContent]  = useState(DEFAULT_CONTENT)
@@ -78,8 +103,8 @@ export default function App() {
       fetch('/api/content').then(r => r.json()).catch(() => ({})),
       fetch('/api/settings').then(r => r.json()).catch(() => ({})),
     ]).then(([c, s]) => {
-      setContent(prev => ({ ...prev, ...c }))
-      setSettings(prev => ({ ...prev, ...s }))
+      setContent(prev => ({ ...prev, ...removeEmptyValues(c) }))
+      setSettings(prev => ({ ...prev, ...removeEmptyValues(s) }))
     })
   }, [])
 

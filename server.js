@@ -170,22 +170,22 @@ const DEFAULT_SETTINGS = {
   emailPassword: '',
   pdfPath: '',
   pdfName: '',
-  heroImagePath: '',   heroImageName: '',
-  sampleImagePath: '', sampleImageName: '',
-  sampleReelPath: '',  sampleReelName: '',
-  sampleProductPath: '', sampleProductName: '',
-  gallery1Path: '', gallery1Name: '',
-  gallery2Path: '', gallery2Name: '',
-  gallery3Path: '', gallery3Name: '',
-  gallery4Path: '', gallery4Name: '',
-  cat1Path: '', cat1Name: '',
-  cat2Path: '', cat2Name: '',
-  cat3Path: '', cat3Name: '',
-  cat4Path: '', cat4Name: '',
-  cat5Path: '', cat5Name: '',
-  cat6Path: '', cat6Name: '',
-  cat7Path: '', cat7Name: '',
-  cat8Path: '', cat8Name: '',
+  heroImagePath: '/assets/digital_products.png', heroImageName: 'digital_products.png',
+  sampleImagePath: '/uploads/sampleImage-1778785743627.jpeg', sampleImageName: 'Sample image',
+  sampleReelPath: '/uploads/sampleReel-1778785743651.mp4', sampleReelName: 'Sample reel',
+  sampleProductPath: '/uploads/sampleProduct-1778785743691.jpeg', sampleProductName: 'Sample product',
+  gallery1Path: '/uploads/gallery1-1778785743699.jpeg', gallery1Name: 'Gallery 1',
+  gallery2Path: '/uploads/gallery2-1778786612351.mp4', gallery2Name: 'Gallery 2',
+  gallery3Path: '/uploads/gallery3-1778786612382.mp4', gallery3Name: 'Gallery 3',
+  gallery4Path: '/uploads/gallery4-1778786612493.mp4', gallery4Name: 'Gallery 4',
+  cat1Path: '/uploads/cat1-1778786612513.jpeg', cat1Name: 'Category 1',
+  cat2Path: '/uploads/cat2-1778786612520.jpeg', cat2Name: 'Category 2',
+  cat3Path: '/uploads/cat3-1778786612526.jpeg', cat3Name: 'Category 3',
+  cat4Path: '/uploads/cat4-1778786612532.jpeg', cat4Name: 'Category 4',
+  cat5Path: '/uploads/cat5-1778786612545.jpeg', cat5Name: 'Category 5',
+  cat6Path: '/uploads/cat6-1778786612553.jpeg', cat6Name: 'Category 6',
+  cat7Path: '/uploads/cat7-1778786612561.jpeg', cat7Name: 'Category 7',
+  cat8Path: '/uploads/cat8-1778786612565.jpeg', cat8Name: 'Category 8',
   mainItems: 'ChatGPT Mastery Course (62 Videos),Prompt Engineering Course (33 Videos),SaaS ChatGPT Course (33 Videos),ChatGPT Power Course (25 Videos),2500 Digital Product Ideas,365+ Automation Templates,1500+ AI Tools',
   bump1Enabled: true,
   bump1Title: '100,000 ChatGPT Prompts Bundle',
@@ -254,6 +254,37 @@ app.use(express.static(path.join(__dirname, 'dist'), { index: false }));
 app.use(express.static(path.join(__dirname), { index: false, dotfiles: 'ignore' }));
 // Uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+const UPLOAD_FALLBACKS = {
+  sampleImage: '/uploads/sampleImage-1778785743627.jpeg',
+  sampleReel: '/uploads/sampleReel-1778785743651.mp4',
+  sampleProduct: '/uploads/sampleProduct-1778785743691.jpeg',
+  gallery1: '/uploads/gallery1-1778785743699.jpeg',
+  gallery2: '/uploads/gallery2-1778786612351.mp4',
+  gallery3: '/uploads/gallery3-1778786612382.mp4',
+  gallery4: '/uploads/gallery4-1778786612493.mp4',
+  cat1: '/uploads/cat1-1778786612513.jpeg',
+  cat2: '/uploads/cat2-1778786612520.jpeg',
+  cat3: '/uploads/cat3-1778786612526.jpeg',
+  cat4: '/uploads/cat4-1778786612532.jpeg',
+  cat5: '/uploads/cat5-1778786612545.jpeg',
+  cat6: '/uploads/cat6-1778786612553.jpeg',
+  cat7: '/uploads/cat7-1778786612561.jpeg',
+  cat8: '/uploads/cat8-1778786612565.jpeg',
+};
+const VIDEO_UPLOAD_FALLBACK = '/uploads/sampleReel-1778785743651.mp4';
+const isVideoUploadPath = (value = '') => /\.(mp4|mov|webm|avi|mkv)(\?|#|$)/i.test(value);
+
+app.use('/uploads', (req, res, next) => {
+  const requested = req.path.replace(/^\//, '');
+  const key = Object.keys(UPLOAD_FALLBACKS).find((name) => requested.startsWith(`${name}-`));
+  if (!key) return next();
+
+  const fallback = isVideoUploadPath(requested) ? VIDEO_UPLOAD_FALLBACK : UPLOAD_FALLBACKS[key];
+  const fallbackPath = path.join(__dirname, fallback.replace(/^\//, ''));
+  if (fs.existsSync(fallbackPath)) return res.sendFile(fallbackPath);
+  next();
+});
 
 // ── Cloudinary setup ──────────────────────────────────────────────────────────
 

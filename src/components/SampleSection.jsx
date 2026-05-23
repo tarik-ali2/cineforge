@@ -2,11 +2,24 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 
 function getYouTubeId(url) {
   if (!url) return null
-  const m = url.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/shorts\/|\/watch\?v=|\/watch\?.+&v=))([\w-]{11})/)
+  try {
+    const parsed = new URL(url, window.location.origin)
+    if (parsed.hostname.includes('youtube.com')) {
+      if (parsed.pathname.startsWith('/shorts/') || parsed.pathname.startsWith('/embed/')) {
+        return parsed.pathname.split('/')[2] || null
+      }
+      return parsed.searchParams.get('v')
+    }
+    if (parsed.hostname.includes('youtu.be')) return parsed.pathname.replace('/', '') || null
+  } catch {}
+  const m = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|watch\?v=|watch\?.+&v=))([\w-]{11})/)
   return m ? m[1] : null
 }
 
-const isVideoFile = src => /\.(mp4|mov|webm|avi|mkv)$/i.test(src || '')
+const isVideoFile = src =>
+  /\.(mp4|mov|webm|avi|mkv)(\?|#|$)/i.test(src || '') ||
+  /^data:video\//i.test(src || '') ||
+  /\/video\/upload\//i.test(src || '')
 
 function SampleCard({ card, onOpen, onPlayChange }) {
   const [playing, setPlaying] = useState(false)

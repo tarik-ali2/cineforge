@@ -1,5 +1,29 @@
+function getYouTubeId(url) {
+  if (!url) return null
+  try {
+    const parsed = new URL(url, window.location.origin)
+    if (parsed.hostname.includes('youtube.com')) {
+      if (parsed.pathname.startsWith('/shorts/') || parsed.pathname.startsWith('/embed/')) {
+        return parsed.pathname.split('/')[2] || null
+      }
+      return parsed.searchParams.get('v')
+    }
+    if (parsed.hostname.includes('youtu.be')) return parsed.pathname.replace('/', '') || null
+  } catch {}
+  const m = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|watch\?v=|watch\?.+&v=))([\w-]{11})/)
+  return m ? m[1] : null
+}
+
+const isVideoFile = src =>
+  /\.(mp4|mov|webm|avi|mkv)(\?|#|$)/i.test(src || '') ||
+  /^data:video\//i.test(src || '') ||
+  /\/video\/upload\//i.test(src || '')
+
 export default function SampleDialog({ sample, onClose, onBuy }) {
   const bgClass = { image: 'image-sample', reel: 'reel-sample', product: 'prod-sample' }[sample.id] || 'image-sample'
+  const ytId = getYouTubeId(sample.imgPath)
+  const videoFile = !ytId && isVideoFile(sample.imgPath)
+  const imageFile = sample.imgPath && !ytId && !videoFile
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -20,8 +44,33 @@ export default function SampleDialog({ sample, onClose, onBuy }) {
           {sample.title}
         </h2>
 
-        {/* Visual preview */}
-        <div className={`media-screen min-h-[200px] ${bgClass} rounded-2xl`} />
+        <div className={`media-screen min-h-[240px] ${sample.imgPath ? '' : bgClass} rounded-2xl overflow-hidden`}>
+          {ytId && (
+            <iframe
+              src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`}
+              className="absolute inset-0 w-full h-full border-0"
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+            />
+          )}
+          {videoFile && (
+            <video
+              src={sample.imgPath}
+              className="absolute inset-0 w-full h-full object-cover"
+              controls
+              autoPlay
+              muted
+              playsInline
+            />
+          )}
+          {imageFile && (
+            <img
+              src={sample.imgPath}
+              alt={sample.title}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
+        </div>
 
         {/* Sample prompt text */}
         <div className="bg-white/[0.06] border border-white/12 rounded-xl p-4">
