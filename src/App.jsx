@@ -106,7 +106,7 @@ const DEFAULT_SETTINGS = {
 const removeEmptyValues = (data = {}) =>
   Object.fromEntries(Object.entries(data).filter(([, value]) => value !== '' && value !== null && value !== undefined))
 
-const META_PIXEL_ID = '1697719404699807'
+const META_PIXEL_ID = '917919111302089'
 
 function trackMetaEvent(eventName, data) {
   if (typeof window.__cineforgeMetaTrack === 'function') {
@@ -192,13 +192,8 @@ export default function App() {
   }, [])
 
   const openBuy = useCallback(() => {
-    if (settings.paymentLink) {
-      trackInitiateCheckoutAndRedirect(settings.paymentLink)
-      return
-    }
-
     openCheckout()
-  }, [openCheckout, settings.paymentLink])
+  }, [openCheckout])
 
   return (
     <div className="min-h-screen bg-[#070707] text-white" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif' }}>
