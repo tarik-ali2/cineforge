@@ -106,13 +106,35 @@ const DEFAULT_SETTINGS = {
 const removeEmptyValues = (data = {}) =>
   Object.fromEntries(Object.entries(data).filter(([, value]) => value !== '' && value !== null && value !== undefined))
 
-function trackInitiateCheckoutAndRedirect(link) {
-  if (typeof fbq === 'function') {
-    fbq('track', 'InitiateCheckout', {
-      value: 199,
-      currency: 'INR',
-    })
+const META_PIXEL_ID = '1697719404699807'
+
+function trackMetaEvent(eventName, data) {
+  if (typeof window.fbq === 'function') {
+    window.fbq('trackSingle', META_PIXEL_ID, eventName, data)
+    return
   }
+
+  const params = new URLSearchParams({
+    id: META_PIXEL_ID,
+    ev: eventName,
+    dl: window.location.href,
+    rl: document.referrer || '',
+    if: 'false',
+    ts: Date.now().toString(),
+  })
+
+  Object.entries(data).forEach(([key, value]) => {
+    params.append(`cd[${key}]`, String(value))
+  })
+
+  new Image().src = `https://www.facebook.com/tr/?${params.toString()}`
+}
+
+function trackInitiateCheckoutAndRedirect(link) {
+  trackMetaEvent('InitiateCheckout', {
+    value: 199,
+    currency: 'INR',
+  })
 
   setTimeout(() => {
     window.location.href = link
@@ -129,13 +151,11 @@ function trackPurchaseOnce() {
 
   if (!shouldTrackPurchase || sessionStorage.getItem('purchase_tracked') === '1') return
 
-  if (typeof fbq === 'function') {
-    fbq('track', 'Purchase', {
-      value: 199,
-      currency: 'INR',
-    })
-    sessionStorage.setItem('purchase_tracked', '1')
-  }
+  trackMetaEvent('Purchase', {
+    value: 199,
+    currency: 'INR',
+  })
+  sessionStorage.setItem('purchase_tracked', '1')
 }
 
 export default function App() {

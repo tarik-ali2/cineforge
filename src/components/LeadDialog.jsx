@@ -1,12 +1,34 @@
 import { useState } from 'react'
 
-function trackInitiateCheckoutAndRedirect(link) {
-  if (typeof fbq === 'function') {
-    fbq('track', 'InitiateCheckout', {
-      value: 199,
-      currency: 'INR',
-    })
+const META_PIXEL_ID = '1697719404699807'
+
+function trackMetaEvent(eventName, data) {
+  if (typeof window.fbq === 'function') {
+    window.fbq('trackSingle', META_PIXEL_ID, eventName, data)
+    return
   }
+
+  const params = new URLSearchParams({
+    id: META_PIXEL_ID,
+    ev: eventName,
+    dl: window.location.href,
+    rl: document.referrer || '',
+    if: 'false',
+    ts: Date.now().toString(),
+  })
+
+  Object.entries(data).forEach(([key, value]) => {
+    params.append(`cd[${key}]`, String(value))
+  })
+
+  new Image().src = `https://www.facebook.com/tr/?${params.toString()}`
+}
+
+function trackInitiateCheckoutAndRedirect(link) {
+  trackMetaEvent('InitiateCheckout', {
+    value: 199,
+    currency: 'INR',
+  })
 
   setTimeout(() => {
     window.location.href = link
