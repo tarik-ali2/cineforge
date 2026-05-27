@@ -119,6 +119,25 @@ function trackInitiateCheckoutAndRedirect(link) {
   }, 300)
 }
 
+function trackPurchaseOnce() {
+  const purchasePaths = ['/thank-you', '/thankyou', '/success', '/payment-success']
+  const params = new URLSearchParams(window.location.search)
+  const shouldTrackPurchase =
+    purchasePaths.some(path => window.location.pathname.startsWith(path)) ||
+    params.get('purchase') === '1' ||
+    params.get('payment') === 'success'
+
+  if (!shouldTrackPurchase || sessionStorage.getItem('purchase_tracked') === '1') return
+
+  if (typeof fbq === 'function') {
+    fbq('track', 'Purchase', {
+      value: 199,
+      currency: 'INR',
+    })
+    sessionStorage.setItem('purchase_tracked', '1')
+  }
+}
+
 export default function App() {
   const [content,  setContent]  = useState(DEFAULT_CONTENT)
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
@@ -136,6 +155,8 @@ export default function App() {
     window.history.pushState({}, '', '/')
   }, [])
   useEffect(() => {
+    trackPurchaseOnce()
+
     Promise.all([
       fetch('/api/content').then(r => r.json()).catch(() => ({})),
       fetch('/api/settings').then(r => r.json()).catch(() => ({})),
