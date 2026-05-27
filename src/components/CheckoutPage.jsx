@@ -1,5 +1,18 @@
 import { useState } from 'react'
 
+function trackInitiateCheckoutAndRedirect(link) {
+  if (typeof fbq === 'function') {
+    fbq('track', 'InitiateCheckout', {
+      value: 199,
+      currency: 'INR',
+    })
+  }
+
+  setTimeout(() => {
+    window.location.href = link
+  }, 300)
+}
+
 export default function CheckoutPage({ onClose, settings = {} }) {
   const [bump1, setBump1] = useState(true)
   const [bump2, setBump2] = useState(true)
@@ -25,9 +38,10 @@ export default function CheckoutPage({ onClose, settings = {} }) {
     else if (bump1 && settings.paymentLinkBump1)       link = settings.paymentLinkBump1
     else if (bump2 && settings.paymentLinkBump2)       link = settings.paymentLinkBump2
 
-    if (window.fbq) window.fbq('track', 'InitiateCheckout', { value: total, currency: 'INR' })
-
-    if (link) window.open(link, '_blank')
+    if (link) {
+      trackInitiateCheckoutAndRedirect(link)
+      return
+    }
     else alert('Payment link admin panel → Settings mein set karo')
     onClose()
   }

@@ -1,5 +1,18 @@
 import { useState } from 'react'
 
+function trackInitiateCheckoutAndRedirect(link) {
+  if (typeof fbq === 'function') {
+    fbq('track', 'InitiateCheckout', {
+      value: 199,
+      currency: 'INR',
+    })
+  }
+
+  setTimeout(() => {
+    window.location.href = link
+  }, 300)
+}
+
 export default function LeadDialog({ onClose, onPurchase }) {
   const [form, setForm]       = useState({ name: '', phone: '', email: '' })
   const [loading, setLoading] = useState(false)
@@ -31,8 +44,7 @@ export default function LeadDialog({ onClose, onPurchase }) {
       const settings = await fetch('/api/settings').then(r => r.json())
 
       if (settings.paymentLink) {
-        // Redirect to payment link
-        window.location.href = settings.paymentLink
+        trackInitiateCheckoutAndRedirect(settings.paymentLink)
       } else if (settings.demoMode) {
         // Demo mode fallback
         const verifyRes = await fetch('/api/verify-payment', {

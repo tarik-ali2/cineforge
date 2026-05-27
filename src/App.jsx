@@ -106,6 +106,19 @@ const DEFAULT_SETTINGS = {
 const removeEmptyValues = (data = {}) =>
   Object.fromEntries(Object.entries(data).filter(([, value]) => value !== '' && value !== null && value !== undefined))
 
+function trackInitiateCheckoutAndRedirect(link) {
+  if (typeof fbq === 'function') {
+    fbq('track', 'InitiateCheckout', {
+      value: 199,
+      currency: 'INR',
+    })
+  }
+
+  setTimeout(() => {
+    window.location.href = link
+  }, 300)
+}
+
 export default function App() {
   const [content,  setContent]  = useState(DEFAULT_CONTENT)
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
@@ -133,8 +146,13 @@ export default function App() {
   }, [])
 
   const openBuy = useCallback(() => {
+    if (settings.paymentLink) {
+      trackInitiateCheckoutAndRedirect(settings.paymentLink)
+      return
+    }
+
     openCheckout()
-  }, [openCheckout])
+  }, [openCheckout, settings.paymentLink])
 
   return (
     <div className="min-h-screen bg-[#070707] text-white" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif' }}>
