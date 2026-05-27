@@ -109,6 +109,11 @@ const removeEmptyValues = (data = {}) =>
 const META_PIXEL_ID = '1697719404699807'
 
 function trackMetaEvent(eventName, data) {
+  if (typeof window.__cineforgeMetaTrack === 'function') {
+    window.__cineforgeMetaTrack(eventName, data)
+    return
+  }
+
   if (typeof window.fbq === 'function') {
     window.fbq('trackSingle', META_PIXEL_ID, eventName, data)
     return

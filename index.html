@@ -45,6 +45,59 @@
       'https://connect.facebook.net/en_US/fbevents.js');
       fbq('init', '1697719404699807');
       fbq('track', 'PageView');
+
+      window.__cineforgeMetaTrack = function(eventName, data) {
+        var payload = data || {};
+        var dedupeKey = eventName + JSON.stringify(payload);
+        var now = Date.now();
+
+        if (
+          window.__cineforgeLastMetaEvent &&
+          window.__cineforgeLastMetaEvent.key === dedupeKey &&
+          now - window.__cineforgeLastMetaEvent.time < 1500
+        ) {
+          return;
+        }
+
+        window.__cineforgeLastMetaEvent = { key: dedupeKey, time: now };
+
+        if (typeof window.fbq === 'function') {
+          window.fbq('trackSingle', '1697719404699807', eventName, payload);
+          return;
+        }
+
+        var params = new URLSearchParams({
+          id: '1697719404699807',
+          ev: eventName,
+          dl: window.location.href,
+          rl: document.referrer || '',
+          if: 'false',
+          ts: String(now)
+        });
+
+        Object.keys(payload).forEach(function(key) {
+          params.append('cd[' + key + ']', String(payload[key]));
+        });
+
+        new Image().src = 'https://www.facebook.com/tr/?' + params.toString();
+      };
+
+      document.addEventListener('click', function(event) {
+        var target = event.target.closest('button, a');
+        if (!target) return;
+
+        var text = (target.textContent || '').toLowerCase();
+        var isCheckoutClick =
+          target.classList.contains('cta-btn') ||
+          /buy now|checkout|payment|get access|get instant|complete my order|unlock full|prompts now/.test(text);
+
+        if (isCheckoutClick && typeof window.__cineforgeMetaTrack === 'function') {
+          window.__cineforgeMetaTrack('InitiateCheckout', {
+            value: 199,
+            currency: 'INR'
+          });
+        }
+      }, true);
     </script>
     <!-- End Meta Pixel Code -->
   </head>
